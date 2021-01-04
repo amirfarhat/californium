@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 import org.eclipse.californium.elements.exception.ConnectorException;
+import org.eclipse.californium.examples.basic.BasicForwardingProxy2;
 
 /**
  * Main starter class for jar execution.
@@ -32,6 +33,8 @@ public class Proxy2 {
 	private static final String HTTP_CLIENT = ExampleProxy2HttpClient.class.getSimpleName();
 	private static final String COAP_SERVER = ExampleCoapServer.class.getSimpleName();
 	private static final String HTTP_SERVER = ExampleHttpServer.class.getSimpleName();
+
+	private static final String BASIC_FORWARDING_PROXY_2 = BasicForwardingProxy2.class.getSimpleName();
 
 	public static void main(String[] args)
 			throws IOException, ConnectorException, InterruptedException, GeneralSecurityException {
@@ -56,13 +59,16 @@ public class Proxy2 {
 			} else if (HTTP_SERVER.equals(start)) {
 				ExampleHttpServer.main(args2);
 				return;
+			} else if (BASIC_FORWARDING_PROXY_2.equals(start)) {
+				BasicForwardingProxy2.main(args2);
+				return;
 			}
 		}
 		System.out.println("\nCalifornium (Cf) Proxy2-Starter");
 		System.out.println("(c) 2020, Bosch.IO GmbH and others");
 		System.out.println();
 		System.out.println("Usage: " + Proxy2.class.getSimpleName() + " (" + CROSS_PROXY + "|" + SECURE_PROXY + "|"
-				+ COAP_CLIENT + "|" + HTTP_CLIENT + "|" + COAP_SERVER + "|" + HTTP_SERVER + ")");
+				+ COAP_CLIENT + "|" + HTTP_CLIENT + "|" + COAP_SERVER + "|" + HTTP_SERVER + "|" + BASIC_FORWARDING_PROXY_2 + ")");
 		if (start != null) {
 			System.out.println("   '" + start + "' is not supported!");
 		}
