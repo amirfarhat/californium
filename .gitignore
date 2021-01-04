@@ -1,6 +1,6 @@
 storage/
 bin/
-run/
+# run/
 test_out/
 tmp/
 doc/
@@ -59,7 +59,7 @@ target/
 *.dmg
 *.gz
 *.iso
-*.jar
+# *.jar
 *.rar
 *.tar
 *.zip
