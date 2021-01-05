@@ -6,11 +6,11 @@ tb-set-node-os $bridge Ubuntu1804-STD
 
 set nodeA [$ns node]
 tb-set-node-os $nodeA Ubuntu1804-STD
-tb-set-node-startcmd $nodeA "sh /proj/MIT-DoS/exp/coap-setup/deps/setup.sh"
+tb-set-node-startcmd $nodeA "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
 
 set nodeB [$ns node]
 tb-set-node-os $nodeB Ubuntu1804-STD
-tb-set-node-startcmd $nodeB "sh proj/MIT-DoS/exp/coap-setup/deps/setup.sh"
+tb-set-node-startcmd $nodeB "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
 
 set lan [$ns make-lan "bridge nodeA nodeB" 1000Mb 0ms]
 
