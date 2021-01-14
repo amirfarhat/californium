@@ -6,7 +6,7 @@ tb-make-soft-vtype weak_hardware {pc3000 bpc3000 pc3060 bpc3060}
 set proxy [$ns node]
 tb-set-node-os $proxy Ubuntu1804-STD
 tb-set-node-startcmd $proxy "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
-tb-set-hardware $proxy_node weak_hardware
+tb-set-hardware $proxy weak_hardware
 
 set coapdevice [$ns node]
 tb-set-node-os $coapdevice Ubuntu1804-STD
