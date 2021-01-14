@@ -6,6 +6,7 @@ httpdst=$2
 
 proxycmd="java -jar demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar ExampleProxy2CoapClient $httpdst"
 
+mkdir -p outs
 rm outs/*
 
 # Execute N requests via the proxy asynchronously
