@@ -47,5 +47,5 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
 if __name__ == '__main__':
-    server = ThreadingHTTPServer(('localhost', args.port), Handler)
+    server = ThreadingHTTPServer(('10.1.2.3', args.port), Handler)
     server.serve_forever()
