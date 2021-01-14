@@ -204,6 +204,8 @@ public class ForwardProxyMessageDeliverer extends ServerMessageDeliverer {
 	protected Resource findResource(Exchange exchange) {
 		Resource resource = null;
 		Request request = exchange.getRequest();
+		LOGGER.info("Got request");
+		LOGGER.info(request.toString());
 		OptionSet options = request.getOptions();
 		boolean proxyOption = options.hasProxyUri() || options.hasProxyScheme();
 		boolean hostOption = options.hasUriHost() || options.hasUriPort();
