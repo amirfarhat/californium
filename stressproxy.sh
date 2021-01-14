@@ -15,7 +15,6 @@ proxycmdprefix="java -jar demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar ExampleProx
 # Execute N requests via the proxy asynchronously
 for ((i = 0 ; i < $N ; i++)); do
   proxycmd="$proxycmdprefix $httpdst/$i $proxyendpoint"
-  echo $proxycmd
   eval "$proxycmd" > "outs/out$i.txt" &
   pids[${i}]=$!
   echo "Sent Req ${i}"
@@ -26,5 +25,3 @@ echo "Waiting for responses"
 for pid in ${pids[*]}; do
   wait $pid
 done
-
-cat outs/out0.txt
