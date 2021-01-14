@@ -86,19 +86,20 @@ public class ExampleProxy2CoapClient {
 
 	public static void main(String[] args) {
 
-		String httpDestination;
-		if (args.length == 0) {
-			httpDestination = "http://useless-facts.sameerkumar.website/api";
-		} else if (args.length == 1) {
-			httpDestination = args[0];
+		String httpDestination = null;
+		String proxyUri = null;
+		if (args.length != 2) {
+			System.out.println("Usage [httpDestination str] [proxyUri str]");
+			System.exit(1);
 		} else {
-			throw new RuntimeException("Bad args format");
+			httpDestination = args[0];
+			proxyUri = args[1];
 		}
 
 		CoapClient client = new CoapClient();
 		// deprecated proxy request - use CoAP and Proxy URI together
 		Request request = Request.newGet();
-		request.setURI("coap://localhost:" + PROXY_PORT + "/coap2http");
+		request.setURI(proxyUri + ":" + PROXY_PORT + "/coap2http");
 		// set proxy URI in option set to bypass the CoAP/proxy URI exclusion
 		request.getOptions().setProxyUri(httpDestination);
 		// System.out.println("Proxy-URI: " + request.getOptions().getProxyUri());
