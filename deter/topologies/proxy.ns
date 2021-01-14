@@ -1,20 +1,28 @@
 set ns [new Simulator]
 source tb_compat.tcl
 
+tb-make-soft-vtype weak_hardware {pc3000 bpc3000 pc3060 bpc3060}
+
 set proxy [$ns node]
 tb-set-node-os $proxy Ubuntu1804-STD
 tb-set-node-startcmd $proxy "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
+tb-set-hardware $proxy_node weak_hardware
 
 set coapdevice [$ns node]
 tb-set-node-os $coapdevice Ubuntu1804-STD
 tb-set-node-startcmd $coapdevice "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
 
+set attacker [$ns node]
+tb-set-node-os $attacker Ubuntu1804-STD
+tb-set-node-startcmd $attacker "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
+
 set originserver [$ns node]
 tb-set-node-os $originserver Ubuntu1804-STD
 tb-set-node-startcmd $originserver "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
 
-$ns duplex-link $coapdevice $proxy 0.25Mb 500ms DropTail
-$ns duplex-link $proxy $originserver 25Mb 100ms DropTail
+$ns duplex-link $coapdevice $proxy   100Mb 50ms DropTail
+$ns duplex-link $attacker $proxy     100Mb 50ms DropTail
+$ns duplex-link $proxy $originserver 100Mb 50ms DropTail
 
 $ns rtproto Static
 $ns run
