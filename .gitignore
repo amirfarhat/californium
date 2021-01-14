@@ -1,6 +1,7 @@
 storage/
 bin/
 # run/
+outs/
 run/demo-apps*.pom
 test_out/
 tmp/
