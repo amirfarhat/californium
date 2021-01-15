@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Number of parallel requests to make
 N=$1
 
