@@ -7,4 +7,4 @@ sudo apt install -y iperf traceroute
 # Install Java: JDK, JRE
 sudo apt install -y default-jdk default-jre
 
-cd /proj/MIT-DoS/exp/coap-setup/deps/californium
+echo "cd /proj/MIT-DoS/exp/coap-setup/deps/californium" >> ~/.shrc
