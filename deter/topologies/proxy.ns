@@ -20,9 +20,9 @@ set originserver [$ns node]
 tb-set-node-os $originserver Ubuntu1804-STD
 tb-set-node-startcmd $originserver "sh /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/setup.sh"
 
-$ns duplex-link $coapdevice $proxy   100Mb 50ms DropTail
-$ns duplex-link $attacker $proxy     100Mb 50ms DropTail
-$ns duplex-link $proxy $originserver 100Mb 50ms DropTail
+$ns duplex-link $coapdevice $proxy   10000Mb 0ms DropTail
+$ns duplex-link $attacker $proxy     10000Mb 0ms DropTail
+$ns duplex-link $proxy $originserver 10000Mb 0ms DropTail
 
 $ns rtproto Static
 $ns run
