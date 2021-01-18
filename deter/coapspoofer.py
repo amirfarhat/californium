@@ -329,6 +329,7 @@ def create_socket():
   Create an IPv4 socket
   """
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  sock.bind((args.source, args.src_port))
   return sock
 
 def generate_coap_packet():
