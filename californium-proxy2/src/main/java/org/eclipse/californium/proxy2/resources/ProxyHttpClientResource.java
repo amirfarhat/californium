@@ -30,6 +30,7 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.protocol.BasicHttpContext;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.Exchange;
@@ -127,7 +128,7 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 		try {
 			// get the mapping to http for the incoming coap request
 			httpRequest = translator.getHttpRequest(destination, incomingCoapRequest);
-			LOGGER.debug("Outgoing http request: {}", httpRequest.getRequestLine());
+			LOGGER.debug("REQ " + incomingCoapRequest.getMID());
 		} catch (InvalidFieldException e) {
 			LOGGER.debug("Problems during the http/coap translation: {}", e.getMessage());
 			exchange.sendResponse(new Response(Coap2CoapTranslator.STATUS_FIELD_MALFORMED));
@@ -148,7 +149,6 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 			public void completed(HttpResponse result) {
 				try {
 					long timestamp = ClockUtil.nanoRealtime();
-					LOGGER.debug("Incoming http response: {}", result.getStatusLine());
 					// the entity of the response, if non repeatable, could be
 					// consumed only one time, so do not debug it!
 					// System.out.println(EntityUtils.toString(httpResponse.getEntity()));
@@ -156,6 +156,8 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 					// translate the received http response in a coap response
 					Response coapResponse = translator.getCoapResponse(result, incomingCoapRequest);
 					coapResponse.setNanoTimestamp(timestamp);
+					coapResponse.setMID(incomingCoapRequest.getMID());
+					LOGGER.debug("RES " + coapResponse.getMID());
 					if (cache != null) {
 						cache.cacheResponse(cacheKey, coapResponse);
 					}
@@ -170,7 +172,6 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 					LOGGER.debug("Error during the http/coap translation: {}", e.getMessage(), e);
 					exchange.sendResponse(new Response(Coap2CoapTranslator.STATUS_FIELD_MALFORMED));
 				}
-				LOGGER.debug("Incoming http response: {} processed!", result.getStatusLine());
 			}
 
 			@Override

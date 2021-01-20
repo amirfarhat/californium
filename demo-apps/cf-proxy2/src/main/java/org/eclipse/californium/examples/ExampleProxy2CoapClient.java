@@ -18,6 +18,10 @@ package org.eclipse.californium.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
+
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
@@ -58,8 +62,6 @@ import org.eclipse.californium.proxy2.resources.ProxyHttpClientResource;
  */
 public class ExampleProxy2CoapClient {
 
-	private static final int PROXY_PORT = 5683;
-
 	private static void request(CoapClient client, Request request) {
 		long start = System.currentTimeMillis();
 		try {
@@ -86,25 +88,46 @@ public class ExampleProxy2CoapClient {
 
 	public static void main(String[] args) {
 
-		String httpDestination = null;
-		String proxyUri = null;
-		if (args.length != 2) {
-			System.out.println("Usage [httpDestination str] [proxyUri str]");
+		String inpHttpDestination = null;
+		String inpProxyUri = null;
+		int inpNumReqs = 1;
+		if (args.length != 3) {
+			System.out.println("Usage [httpDestination str] [proxyUri str] [numReqs int]");
 			System.exit(1);
 		} else {
-			httpDestination = args[0];
-			proxyUri = args[1];
+			inpHttpDestination = args[0];
+			inpProxyUri = args[1];
+			inpNumReqs = Math.max(1, Integer.parseInt(args[2]));
 		}
 
-		CoapClient client = new CoapClient();
-		// deprecated proxy request - use CoAP and Proxy URI together
-		Request request = Request.newGet();
-		request.setURI(proxyUri + ":" + PROXY_PORT + "/coap2http");
-		// set proxy URI in option set to bypass the CoAP/proxy URI exclusion
-		request.getOptions().setProxyUri(httpDestination);
-		// System.out.println("Proxy-URI: " + request.getOptions().getProxyUri());
-		request(client, request);
+		final String httpDestination = inpHttpDestination;
+		final String proxyUri = inpProxyUri;
+		final int numReqs = inpNumReqs;
 
+		final CoapClient client = new CoapClient();
+		Request request;
+
+		int nThread = 60;
+		ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nThread));
+		for (int i = 0; i < numReqs; i++) {
+			final int ii = i;
+			executorService.submit(new Runnable(){
+				@Override
+				public void run() {
+					Request request = Request.newGet();
+					request.setURI(proxyUri + "/coap2http");
+					request.getOptions().setProxyUri(httpDestination + "/" + ii);
+					try {
+						client.advanced(request);
+					} catch (ConnectorException|IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+			
+			// request(client, request);
+		}
+		
 		// // deprecated proxy request - use CoAP and Proxy URI together
 		// request = Request.newGet();
 		// request.setURI("coap://localhost:" + PROXY_PORT + "/coap2coap");

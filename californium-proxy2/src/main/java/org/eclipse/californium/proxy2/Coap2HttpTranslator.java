@@ -90,8 +90,6 @@ public class Coap2HttpTranslator extends CoapUriTranslator {
 			httpRequest.addHeader(header);
 		}
 
-		LOGGER.debug("Incoming request translated correctly");
-
 		return httpRequest;
 	}
 
@@ -166,8 +164,6 @@ public class Coap2HttpTranslator extends CoapUriTranslator {
 				coapResponse.getOptions().setContentFormat(coapContentType);
 			}
 		}
-
-		LOGGER.debug("Incoming response translated correctly");
 
 		return coapResponse;
 	}
