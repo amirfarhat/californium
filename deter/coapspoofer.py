@@ -1,13 +1,19 @@
 #!/bin/sh
 
+import os
 import sys
 import math
+import struct
 import socket
+import random
+random.seed(12)
 import argparse
 import bitstruct
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
 from pprint import pprint
-from struct import pack, unpack
+from collections import OrderedDict
 
 def parse_args():
   """
@@ -18,6 +24,7 @@ def parse_args():
                       help='Enable debug mode.  Print packets before trying to send',
                       action='store_true', default=False)
 
+  # IP + UDP
   parser.add_argument('-s', '--source', dest='source',
                       help='Source Address',
                       action='store', default='127.0.0.1', type=str)
@@ -31,6 +38,7 @@ def parse_args():
                       help='Destination Port',
                       action='store', default=80, type=int)
 
+  # CoAP Header
   parser.add_argument('-m', '--message-id', dest='message_id',
                       help='ID of the CoAP Message to send',
                       action='store', default=None, type=int)
@@ -43,23 +51,26 @@ def parse_args():
   parser.add_argument('-c', '--code', dest='code',
                       help='Code of the CoAP Message to send',
                       action='store', default='000', type=str)
-  parser.add_argument('-o', '--options', dest='options',
-                      help='Options block include in the CoAP Message to send',
-                      nargs='?', action='store', default="", type=str)
+  
+  # CoAP Options - Proxying
+  # Uri-Host: localhost, Uri-Path: coap2http, Proxy-Uri: http://localhost:8000
+  parser.add_argument('-u', '--uri-host', dest='uri_host',
+                      help='The Uri-Host Option specifies the Internet host of the resource being requested',
+                      nargs='?', action='store', default="127.0.0.1", type=str)
+  parser.add_argument('-a', '--uri-path', dest='uri_path',
+                      help='The Uri-Path Option specifies one segment of the absolute path to the resource',
+                      nargs='?', action='store', default="coap2http", type=str)
+  parser.add_argument('-y', '--proxy-uri', dest='proxy_uri',
+                      help='The Proxy-Uri Option is used to make a request to a forward-proxy',
+                      nargs='?', action='store', default="http://localhost:8000", type=str)
+  
+  # CoAP Payload
   parser.add_argument('-p', '--payload', dest='payload',
                       help='Payload of the CoAP Message to send',
                       nargs='?', action='store', default="", type=str)
   return parser.parse_args()
   
 args = parse_args()
-
-def dprint(*fargs, **kwargs):
-  if args.debug:
-    print(*fargs, **kwargs)
-
-def dpprint(*fargs, **kwargs):
-  if args.debug:
-    pprint(*fargs, **kwargs)
 
 # --------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------
@@ -96,11 +107,12 @@ class IPv4Header:
   """
   Header of an IPv4 Packet
   """
-  def __init__(self):
+  def __init__(self, payload):
+    assert isinstance(payload, bytes)
     self.ihl = 5
     self.version = 4
     self.tos = 0
-    self.tot_len = 20 + 20
+    self.tot_len = 20 + len(payload)
     self.id = 54321
     self.frag_off = 0
     self.ttl = 255
@@ -113,7 +125,7 @@ class IPv4Header:
   def pack(self):
     if 'freebsd' in sys.platform.lower():
       #In FreeBSD, the length and offset fields must be provided in host-byte (little-endian) order
-      p = pack(
+      p = struct.pack(
           '!BBHHHBBH4s4s',
           self.ihl_version,
           self.tos,
@@ -127,7 +139,7 @@ class IPv4Header:
           self.daddr
       )
     else:
-      p = pack(
+      p = struct.pack(
           '!BBHHHBBH4s4s',
           self.ihl_version,
           self.tos,
@@ -155,7 +167,7 @@ class UDPPacket:
     self.data_len = len(data)
 
   def pack(self):
-    return pack(
+    return struct.pack(
       "!HHHH{}s".format(self.data_len),
       self.sport,
       self.dport,
@@ -203,13 +215,14 @@ class CoAPMessage:
       raise ValueError(f'Bad message type. Need one of {self.COAP_MSG_STR_TO_ID.keys()}')
     self.message_type = self.COAP_MSG_STR_TO_ID[self.message_type]
 
-    # Check token and make token length
-    if not self.check_token(args.token):
-      raise ValueError('Bad token')
-    self.token = args.token
-    
-    # The token's length (in bytes) must be between 0 and 8
-    self.token_length = token_to_bytes(args.token)
+    # Check token and token length
+    if args.token is None:
+      self.token, self.token_length = self.random_token()
+    else:
+      if not self.check_token(args.token):
+        raise ValueError('Bad token')
+      self.token = args.token
+      self.token_length = token_to_bytes(self.token)
     assert 0 <= self.token_length <= 8
 
     # Check code
@@ -222,28 +235,100 @@ class CoAPMessage:
       raise ValueError(f'Bad message ID')
     self.message_id = args.message_id
 
-    self.options = args.options
+    self.options = OrderedDict()
+    self.options['uri_host']  = (3,  args.uri_host),
+    self.options['uri_path']  = (11, args.uri_path),
+    self.options['proxy_uri'] = (35, args.proxy_uri),
+
     self.payload = bytes(args.payload, "utf-8")
 
   def pack(self):
-    value_map = {
-      'version'      : self.COAP_VERSION,
-      'type'         : self.message_type,
-      'token_length' : self.token_length,
-      'code'         : self.code,
-      'message_id'   : self.message_id,
-    }
-    rep_map = {
-      'version'      : 'u2',
-      'type'         : 'u2',
-      'token_length' : 'u4',
-      'code'         : 'u8',
-      'message_id'   : 'u16',
-    }
+    ic(self.__dict__)
+    out = bytes()
+
+    # ------------ Pack header
     
-    fields = ['version', 'type', 'token_length', 'code', 'message_id']
-    reps = "".join(rep_map[f] for f in fields)
-    return bitstruct.pack_dict(reps, fields, value_map)
+    out += bitstruct.pack(
+      "u2u2u4u8u16",
+      self.COAP_VERSION,
+      self.message_type,
+      self.token_length,
+      self.code,
+      self.message_id,
+    )
+  
+    # ------------ Pack token
+
+    packed_token = struct.pack(f"!{self.token_length}s", self.token)
+    out += packed_token
+
+    # ------------ Pack options
+
+    option_number = 3
+    option_value = '127.0.0.1'
+    option_delta = 3
+    option_value_bytes = option_value.encode('utf-8')
+    option_length_bytes = len(option_value_bytes)
+
+    # IMPORTANT: NOTE HOW THE BIT SHIFTING IS HAPPENING
+    # HERE WITH THE STRUCT PACKAGE TO ACHIEVE THE DESIRING
+    # BIT-LEVEL PACKING. IDEA/TODO: DO THIS WITH THE HEADER
+    # SINCE THE STRUCT PACKAGE SEEMS MUCH MORE RELIBALE (STDLIB) 
+    packed_options = struct.pack(
+      f"!B{option_length_bytes}s",
+      (option_delta << 4) | option_length_bytes,
+      option_value_bytes
+    )
+
+    out += packed_options
+    
+    return out
+
+    """
+    # Now pack options
+    last_option_number = 0
+    for option_name, option_tuple in self.options.items():
+      option_number, option_value = option_tuple[0]
+      dprint(f"Packing {option_name} ({option_number})...")
+
+      # Write 4-bit option delta
+      option_delta = option_number - last_option_number
+      option_delta_nibble = self._get_option_nibble(option_delta)
+      out += bitstruct.pack("u4", option_delta_nibble)
+      dprint(f"Packed option_delta_nibble {option_delta_nibble}...")
+
+      # Write 4-bit option length
+      option_value_bytes = option_value.encode('utf-8')
+      option_value_bytes_size = len(option_value_bytes)
+      option_size_nibble = self._get_option_nibble(option_value_bytes_size)
+      out += bitstruct.pack("u4", option_size_nibble)
+      dprint(f"Packed option_size_nibble {option_size_nibble} from option size {option_value_bytes_size} bytes...")
+
+      # Note: Options 13, 14, 15 require more serialization
+      if option_number in [13, 14, 15]:
+        raise NotImplementedError()
+
+      # Write option value
+      out += bitstruct.pack(f"r{option_value_bytes_size}", option_value_bytes)
+      dprint(f"Packed {option_name} as value {option_value} with size {option_value_bytes_size} bytes")
+      
+      last_option_number = option_number
+
+      break
+    """
+
+  @classmethod
+  def _get_option_nibble(cls, option_value):
+    """
+    Returns the 4-bit option header value
+    """
+    if option_value <= 12:
+      return option_value
+    elif option_value <= 255 + 13:
+      return 13
+    elif option_value <= 65535 + 269:
+      return 14
+    raise Exception('Bad option number')
 
   @classmethod
   def check_code_str(cls, code_str):
@@ -296,18 +381,20 @@ class CoAPMessage:
     return code
   
   @classmethod
-  def check_token(cls, token):
+  def check_token(cls, token: bytes):
     """
     Return True if input token `token` is valid and False otherwise
     """
-    return 0 <= token <= cls.MAX_TOKEN
+    int_token = int.from_bytes(token, byteorder=sys.byteorder)
+    return 0 <= int_token <= cls.MAX_TOKEN
 
   @classmethod
-  def random_token(cls, mid):
+  def random_token(cls) -> (bytes, int):
     """
-    Return a new token sampled randomly from [0, MAX_TOKEN]
+    Return a new random token
     """
-    raise NotImplementedError()
+    num_bytes = random.randint(1, 8)
+    return os.urandom(num_bytes), num_bytes
   
   @classmethod
   def check_message_id(cls, mid):
@@ -329,37 +416,29 @@ def create_socket():
   Create an IPv4 socket
   """
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+  # sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+  # sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
   sock.bind((args.source, args.src_port))
   return sock
 
 def generate_coap_packet():
   coap_msg = CoAPMessage()
-  dpprint(coap_msg.__dict__)
   packed_coap = coap_msg.pack()
-
-  udp_pkt = UDPPacket(packed_coap)
-  # udp_pkt = UDPPacket(data=bytes('x', 'utf-8'))
-  packed_udp = udp_pkt.pack()
-
-  ip_hdr = IPv4Header()
-  packed_ip_hdr = ip_hdr.pack()
-
-  packet = packed_ip_hdr + packed_udp
   return packed_coap
 
-def send_coap_packet(socket, packet):
+def send_coap_packet(sock, packet):
   try:
-    dprint(f"Using socket {socket}")
-    dprint(f"Sending to {args.destination}:{args.dst_port}")
-    out = socket.sendto(packet, (args.destination, args.dst_port))
-    dprint(f"Socket output: {out}")
+    ic(f"Using socket {sock}")
+    ic(f"Sending to {args.destination}:{args.dst_port}")
+    out = sock.sendto(packet, (args.destination, args.dst_port))
+    ic(f"Sock output: {out}")
   except() as e:
     print('Failed to send packet', e)
 
 def main():
-  socket = create_socket()
+  sock = create_socket()
   packet = generate_coap_packet()
-  send_coap_packet(socket, packet)
+  send_coap_packet(sock, packet)
 
 if __name__ == "__main__":
   import doctest
