@@ -21,7 +21,7 @@ def parse_args():
   
   parser.add_argument('-p', '--port', dest='port',
                       help='port to launch the server on',
-                      action='store', default=80, type=int)
+                      action='store', default=8000, type=int)
   parser.add_argument('-d', '--delay', dest='delay',
                       help='Artifical delay to include per request',
                       action='store', default=0, type=float)

@@ -3,15 +3,14 @@
 import os
 import sys
 import math
+import time
 import struct
 import socket
 import random
-random.seed(12)
 import argparse
 import bitstruct
 
 from icecream import ic
-ic.configureOutput(includeContext=True)
 from pprint import pprint
 from collections import OrderedDict
 
@@ -53,7 +52,6 @@ def parse_args():
                       action='store', default='000', type=str)
   
   # CoAP Options - Proxying
-  # Uri-Host: localhost, Uri-Path: coap2http, Proxy-Uri: http://localhost:8000
   parser.add_argument('-u', '--uri-host', dest='uri_host',
                       help='The Uri-Host Option specifies the Internet host of the resource being requested',
                       nargs='?', action='store', default="127.0.0.1", type=str)
@@ -68,6 +66,15 @@ def parse_args():
   parser.add_argument('-p', '--payload', dest='payload',
                       help='Payload of the CoAP Message to send',
                       nargs='?', action='store', default="", type=str)
+
+  # Meta Information
+  parser.add_argument('-f', '--flood', dest='flood',
+                      help='Flag indicating whether to send packets at line rate',
+                      nargs='?', action='store', default=False, type=bool)
+  parser.add_argument('-n', '--num-messages', dest='num_messages',
+                      help='Number of packets to send. Cannot also be used with the flood option',
+                      nargs='?', action='store', default=1, type=int)
+
   return parser.parse_args()
   
 args = parse_args()
@@ -208,7 +215,10 @@ class CoAPMessage:
   COAP_VERSION = 1
   COAP_MSG_STR_TO_ID = { 'CON':0, 'NON':1, 'ACK':2, 'RST':3 }
 
-  def __init__(self):
+  def __init__(self, msg_id=None, proxy_uri_suffix=""):
+    if msg_id is None:
+      msg_id = args.message_id
+
     # Type of message (0-CON, 1-NON, 2-ACK, 3-RST)
     self.message_type = str.upper(args.message_type)
     if self.message_type not in CoAPMessage.COAP_MSG_STR_TO_ID:
@@ -219,35 +229,35 @@ class CoAPMessage:
     if args.token is None:
       self.token, self.token_length = self.random_token()
     else:
-      if not self.check_token(args.token):
+      if not self.check_token(self.token):
         raise ValueError('Bad token')
-      self.token = args.token
+      self.token = token
       self.token_length = token_to_bytes(self.token)
+      
     assert 0 <= self.token_length <= 8
 
     # Check code
     self.code = self.code_str_to_int(args.code)
 
     # Check message ID
-    if args.message_id is None:
-      args.message_id = self.random_message_id()
-    if not CoAPMessage.check_message_id(args.message_id):
+    if msg_id is None:
+      msg_id = self.random_message_id()
+    if not CoAPMessage.check_message_id(msg_id):
       raise ValueError(f'Bad message ID')
-    self.message_id = args.message_id
+    self.message_id = msg_id
 
+    # Construct proxy-specific mappings
     self.options = OrderedDict()
     self.options['uri_host']  = (3,  args.uri_host),
     self.options['uri_path']  = (11, args.uri_path),
-    self.options['proxy_uri'] = (35, args.proxy_uri),
+    self.options['proxy_uri'] = (35, f"{args.proxy_uri}/{proxy_uri_suffix}"),
 
     self.payload = bytes(args.payload, "utf-8")
 
   def pack(self):
-    ic(self.__dict__)
     out = bytes()
 
-    # ------------ Pack header
-    
+    # Header
     out += bitstruct.pack(
       "u2u2u4u8u16",
       self.COAP_VERSION,
@@ -257,65 +267,49 @@ class CoAPMessage:
       self.message_id,
     )
   
-    # ------------ Pack token
-
+    # Token
     packed_token = struct.pack(f"!{self.token_length}s", self.token)
     out += packed_token
 
-    # ------------ Pack options
-
-    option_number = 3
-    option_value = '127.0.0.1'
-    option_delta = 3
-    option_value_bytes = option_value.encode('utf-8')
-    option_length_bytes = len(option_value_bytes)
-
-    # IMPORTANT: NOTE HOW THE BIT SHIFTING IS HAPPENING
-    # HERE WITH THE STRUCT PACKAGE TO ACHIEVE THE DESIRING
-    # BIT-LEVEL PACKING. IDEA/TODO: DO THIS WITH THE HEADER
-    # SINCE THE STRUCT PACKAGE SEEMS MUCH MORE RELIBALE (STDLIB) 
-    packed_options = struct.pack(
-      f"!B{option_length_bytes}s",
-      (option_delta << 4) | option_length_bytes,
-      option_value_bytes
-    )
-
-    out += packed_options
-    
-    return out
-
-    """
-    # Now pack options
+    # Options
     last_option_number = 0
     for option_name, option_tuple in self.options.items():
       option_number, option_value = option_tuple[0]
-      dprint(f"Packing {option_name} ({option_number})...")
-
-      # Write 4-bit option delta
+      
+      # Compute option delta
       option_delta = option_number - last_option_number
-      option_delta_nibble = self._get_option_nibble(option_delta)
-      out += bitstruct.pack("u4", option_delta_nibble)
-      dprint(f"Packed option_delta_nibble {option_delta_nibble}...")
 
-      # Write 4-bit option length
+      # Compute option value and length in bytes
       option_value_bytes = option_value.encode('utf-8')
-      option_value_bytes_size = len(option_value_bytes)
-      option_size_nibble = self._get_option_nibble(option_value_bytes_size)
-      out += bitstruct.pack("u4", option_size_nibble)
-      dprint(f"Packed option_size_nibble {option_size_nibble} from option size {option_value_bytes_size} bytes...")
+      option_length_bytes = len(option_value_bytes)
 
-      # Note: Options 13, 14, 15 require more serialization
-      if option_number in [13, 14, 15]:
+      # IMPORTANT: NOTE HOW THE BIT SHIFTING IS HAPPENING
+      # HERE WITH THE STRUCT PACKAGE TO ACHIEVE THE DESIRED
+      # BIT-LEVEL PACKING. IDEA/TODO: DO THIS WITH THE HEADER
+      # SINCE THE STRUCT PACKAGE SEEMS MUCH MORE RELIBALE (STDLIB)
+      # See https://tools.ietf.org/html/rfc7252#section-3.1 for extended
+      if option_delta < 13 and option_length_bytes < 13:
+        packed_option = struct.pack(
+          f"!B{option_length_bytes}s",
+          (option_delta << 4) | option_length_bytes,
+          option_value_bytes
+        )
+      elif (13 <= option_delta <= 13+0xFF) and (13 <= option_length_bytes <= 13+0xFF):
+        D, L = 13, 13
+        packed_option = struct.pack(
+          f"!BBB{option_length_bytes}s",
+          (D << 4) | L,
+          option_delta - D,
+          option_length_bytes - L,
+          option_value_bytes
+        )
+      else:
         raise NotImplementedError()
 
-      # Write option value
-      out += bitstruct.pack(f"r{option_value_bytes_size}", option_value_bytes)
-      dprint(f"Packed {option_name} as value {option_value} with size {option_value_bytes_size} bytes")
-      
+      out += packed_option
       last_option_number = option_number
-
-      break
-    """
+    
+    return out
 
   @classmethod
   def _get_option_nibble(cls, option_value):
@@ -385,6 +379,8 @@ class CoAPMessage:
     """
     Return True if input token `token` is valid and False otherwise
     """
+    if not isinstance(token, bytes):
+      return False
     int_token = int.from_bytes(token, byteorder=sys.byteorder)
     return 0 <= int_token <= cls.MAX_TOKEN
 
@@ -393,7 +389,8 @@ class CoAPMessage:
     """
     Return a new random token
     """
-    num_bytes = random.randint(1, 8)
+    # num_bytes = random.randint(1, 8)
+    num_bytes = 4
     return os.urandom(num_bytes), num_bytes
   
   @classmethod
@@ -405,11 +402,11 @@ class CoAPMessage:
     return cls.NONE <= mid <= cls.MAX_MESSAGE_ID
 
   @classmethod
-  def random_message_id(cls, mid):
+  def random_message_id(cls):
     """
     Return a new message ID sampled randomly from [0, MAX_MESSAGE_ID]
     """
-    raise NotImplementedError()
+    return random.randint(0, cls.MAX_MESSAGE_ID)
 
 def create_socket():
   """
@@ -421,24 +418,44 @@ def create_socket():
   sock.bind((args.source, args.src_port))
   return sock
 
-def generate_coap_packet():
-  coap_msg = CoAPMessage()
-  packed_coap = coap_msg.pack()
-  return packed_coap
+def coap_message_generator():
+  offset = 0
 
-def send_coap_packet(sock, packet):
-  try:
-    ic(f"Using socket {sock}")
-    ic(f"Sending to {args.destination}:{args.dst_port}")
-    out = sock.sendto(packet, (args.destination, args.dst_port))
-    ic(f"Sock output: {out}")
-  except() as e:
-    print('Failed to send packet', e)
+  # Generate first message
+  coap_message = CoAPMessage(proxy_uri_suffix=offset)
+  yield coap_message
+  
+  while True:
+    # Fetch previous parameters
+    mid = coap_message.message_id
+
+    # Increment previous parameters
+    mid += 1
+    offset += 1
+
+    # Generate next message
+    coap_message = CoAPMessage(msg_id=mid, proxy_uri_suffix=offset)
+    yield coap_message
+
+def send_coap_message(sock, message):
+  packet = message.pack()
+  out = sock.sendto(packet, (args.destination, args.dst_port))
 
 def main():
+  if args.num_messages <= 0:
+    raise ValueError("Err: Must have nonnegative number of messages")
+  if args.flood and args.num_messages > 0:
+    raise ValueError("Err: Either flood or num_messages, not both")
+
   sock = create_socket()
-  packet = generate_coap_packet()
-  send_coap_packet(sock, packet)
+  gen = coap_message_generator()
+  if args.flood:
+    raise NotImplementedError()
+  else:
+    for i in range(args.num_messages):
+      message = next(gen)
+      send_coap_message(sock, message)
+      ic(f"send {i+1}")
 
 if __name__ == "__main__":
   import doctest
