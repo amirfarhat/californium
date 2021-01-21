@@ -257,14 +257,15 @@ class CoAPMessage:
 
     # Header: 32 bits = 4 bytes
     header = 0
-    header = (header << 2) | self.COAP_VERSION
-    header = (header << 2) | self.message_type
-    header = (header << 4) | self.token_length
-    header = (header << 8) | self.code  
+    header = (header << 2)  | self.COAP_VERSION
+    header = (header << 2)  | self.message_type
+    header = (header << 4)  | self.token_length
+    header = (header << 8)  | self.code  
     header = (header << 16) | self.message_id
-    out += struct.pack("!I", header)
+    packed_header = struct.pack("!I", header)
+    out += packed_header
   
-    # Token
+    # Token: 0-8 bytes
     packed_token = struct.pack(f"!{self.token_length}s", self.token)
     out += packed_token
 
@@ -280,46 +281,53 @@ class CoAPMessage:
       option_value_bytes = option_value.encode('utf-8')
       option_length_bytes = len(option_value_bytes)
 
-      # IMPORTANT: NOTE HOW THE BIT SHIFTING IS HAPPENING
-      # HERE WITH THE STRUCT PACKAGE TO ACHIEVE THE DESIRED
-      # BIT-LEVEL PACKING. IDEA/TODO: DO THIS WITH THE HEADER
-      # SINCE THE STRUCT PACKAGE SEEMS MUCH MORE RELIBALE (STDLIB)
-      # See https://tools.ietf.org/html/rfc7252#section-3.1 for extended
-      if option_delta < 13 and option_length_bytes < 13:
-        packed_option = struct.pack(
-          f"!B{option_length_bytes}s",
-          (option_delta << 4) | option_length_bytes,
-          option_value_bytes
-        )
-      elif (13 <= option_delta <= 13+0xFF) and (13 <= option_length_bytes <= 13+0xFF):
-        D, L = 13, 13
-        packed_option = struct.pack(
-          f"!BBB{option_length_bytes}s",
-          (D << 4) | L,
-          option_delta - D,
-          option_length_bytes - L,
-          option_value_bytes
-        )
-      else:
-        raise NotImplementedError()
-
+      # Pack the option, taking extended encoding into account
+      packed_option = self.pack_option(option_delta, option_length_bytes, option_value_bytes)
       out += packed_option
+
       last_option_number = option_number
     
     return out
 
   @classmethod
-  def _get_option_nibble(cls, option_value):
-    """
-    Returns the 4-bit option header value
-    """
-    if option_value <= 12:
-      return option_value
-    elif option_value <= 255 + 13:
-      return 13
-    elif option_value <= 65535 + 269:
-      return 14
-    raise Exception('Bad option number')
+  def pack_option(cls, option_delta, option_length_bytes, option_value_bytes):
+    if (option_delta < 0) or (option_delta > 0xFFFF + 14):
+      raise ValueError('Bad option_delta')
+
+    if (option_length_bytes < 0) or (option_length_bytes > 0xFFFF + 14):
+      raise ValueError('Bad option_length_bytes')
+
+    # Determine option delta extended encoding
+    D0 = (        0 <= option_delta < 13         )
+    D1 = (       13 <= option_delta < 14 + 0xFF  )
+    D2 = (14 + 0xFF <= option_delta < 15 + 0xFFFF)
+
+    # Determine option length extended encoding
+    L0 = (        0 <= option_length_bytes < 13         )
+    L1 = (       13 <= option_length_bytes < 14 + 0xFF  )
+    L2 = (14 + 0xFF <= option_length_bytes < 15 + 0xFFFF)
+
+    if (D0 and L0):
+      # Case: No delta or length extra encoding
+      packed_option = struct.pack(
+        f"!B{option_length_bytes}s",
+        (option_delta << 4) | option_length_bytes,
+        option_value_bytes
+      )
+    elif (D1 and L1):
+      # Case: Delta and length 1 extra byte encoding
+      D, L = 13, 13
+      packed_option = struct.pack(
+        f"!BBB{option_length_bytes}s",
+        (D << 4) | L,
+        option_delta - D,
+        option_length_bytes - L,
+        option_value_bytes
+      )
+    else:
+      raise NotImplementedError()
+
+    return packed_option
 
   @classmethod
   def check_code_str(cls, code_str):
@@ -451,7 +459,7 @@ def main():
       message = next(gen)
       send_coap_message(sock, message)
       sent += 1
-      if sent % 1000 == 0:
+      if sent % 5000 == 0:
         print(f"Sent {sent}")
   else:
     for i in range(args.num_messages):
