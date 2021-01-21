@@ -9,7 +9,6 @@ import socket
 import random
 import argparse
 
-from icecream import ic
 from pprint import pprint
 from collections import OrderedDict
 
@@ -453,12 +452,12 @@ def main():
       send_coap_message(sock, message)
       sent += 1
       if sent % 1000 == 0:
-        ic(f"Sent {sent}")
+        print(f"Sent {sent}")
   else:
     for i in range(args.num_messages):
       message = next(gen)
       send_coap_message(sock, message)
-    ic(f"Sent {args.num_messages}")
+    print(f"Sent {args.num_messages}")
 
 if __name__ == "__main__":
   import doctest
