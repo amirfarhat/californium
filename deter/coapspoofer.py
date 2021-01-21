@@ -418,9 +418,9 @@ def create_socket():
   Create an IPv4 socket
   """
   sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  # sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
+  sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
   # sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
-  sock.bind((args.source, args.src_port))
+  # sock.bind((args.source, args.src_port))
   return sock
 
 def coap_message_generator():
@@ -443,7 +443,11 @@ def coap_message_generator():
     yield coap_message
 
 def send_coap_message(sock, message):
-  packet = message.pack()
+  udp_packet = UDPPacket(message.pack())
+  packed_udp = udp_packet.pack()
+  ip_header = IPv4Header(packed_udp)
+  packet = ip_header.pack() + packed_udp
+
   out = sock.sendto(packet, (args.destination, args.dst_port))
 
 def main():
