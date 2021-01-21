@@ -73,7 +73,11 @@ def parse_args():
                       help='Number of packets to send. Cannot also be used with the flood option',
                       nargs='?', action='store', default=-1, type=int)
 
-  return parser.parse_args()
+  args = parser.parse_args()
+  
+  # Platform-specific config
+  args.local = True if (os.uname().nodename == 'Amirs-MBP') else False
+  return args
   
 args = parse_args()
 
@@ -417,10 +421,11 @@ def create_socket():
   """
   Create an IPv4 socket
   """
-  sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-  sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
-  # sock.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
-  # sock.bind((args.source, args.src_port))
+  if args.local:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((args.source, args.src_port))
+  else:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
   return sock
 
 def coap_message_generator():
@@ -443,10 +448,16 @@ def coap_message_generator():
     yield coap_message
 
 def send_coap_message(sock, message):
-  udp_packet = UDPPacket(message.pack())
-  packed_udp = udp_packet.pack()
-  ip_header = IPv4Header(packed_udp)
-  packet = ip_header.pack() + packed_udp
+  packed_coap_message = message.pack()
+  
+  if args.local:
+    packet = packed_coap_message
+  else:
+    udp_packet = UDPPacket(packed_coap_message)
+    packed_udp = udp_packet.pack()
+
+    ip_header = IPv4Header(packed_udp)
+    packet = ip_header.pack() + packed_udp
 
   out = sock.sendto(packet, (args.destination, args.dst_port))
 
