@@ -8,7 +8,6 @@ import struct
 import socket
 import random
 import argparse
-import bitstruct
 
 from icecream import ic
 from pprint import pprint
@@ -257,15 +256,14 @@ class CoAPMessage:
   def pack(self):
     out = bytes()
 
-    # Header
-    out += bitstruct.pack(
-      "u2u2u4u8u16",
-      self.COAP_VERSION,
-      self.message_type,
-      self.token_length,
-      self.code,
-      self.message_id,
-    )
+    # Header: 32 bits = 4 bytes
+    header = 0
+    header = (header << 2) | self.COAP_VERSION
+    header = (header << 2) | self.message_type
+    header = (header << 4) | self.token_length
+    header = (header << 8) | self.code  
+    header = (header << 16) | self.message_id
+    out += struct.pack("!I", header)
   
     # Token
     packed_token = struct.pack(f"!{self.token_length}s", self.token)
