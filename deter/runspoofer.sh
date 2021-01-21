@@ -9,4 +9,4 @@ sudo python3 coapspoofer.py \
   --uri-host 127.0.0.1 \
   --uri-path coap2http \
   --proxy-uri http://127.0.0.1:8000 \
-  --num-messages 750 \
+  --flood True \

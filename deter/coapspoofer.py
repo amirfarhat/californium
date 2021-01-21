@@ -73,7 +73,7 @@ def parse_args():
                       nargs='?', action='store', default=False, type=bool)
   parser.add_argument('-n', '--num-messages', dest='num_messages',
                       help='Number of packets to send. Cannot also be used with the flood option',
-                      nargs='?', action='store', default=1, type=int)
+                      nargs='?', action='store', default=-1, type=int)
 
   return parser.parse_args()
   
@@ -430,7 +430,7 @@ def coap_message_generator():
     mid = coap_message.message_id
 
     # Increment previous parameters
-    mid += 1
+    mid = ((mid + 1) % CoAPMessage.MAX_MESSAGE_ID)
     offset += 1
 
     # Generate next message
@@ -442,20 +442,25 @@ def send_coap_message(sock, message):
   out = sock.sendto(packet, (args.destination, args.dst_port))
 
 def main():
-  if args.num_messages <= 0:
-    raise ValueError("Err: Must have nonnegative number of messages")
   if args.flood and args.num_messages > 0:
     raise ValueError("Err: Either flood or num_messages, not both")
 
   sock = create_socket()
   gen = coap_message_generator()
+
   if args.flood:
-    raise NotImplementedError()
+    sent = 0
+    while True:
+      message = next(gen)
+      send_coap_message(sock, message)
+      sent += 1
+      if sent % 1000 == 0:
+        ic(f"Sent {sent}")
   else:
     for i in range(args.num_messages):
       message = next(gen)
       send_coap_message(sock, message)
-      ic(f"send {i+1}")
+    ic(f"Sent {args.num_messages}")
 
 if __name__ == "__main__":
   import doctest
