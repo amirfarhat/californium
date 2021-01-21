@@ -25,9 +25,11 @@ def parse_args():
   parser.add_argument('-d', '--delay', dest='delay',
                       help='Artifical delay to include per request',
                       action='store', default=0, type=float)
+  parser.add_argument('-x', '--debug', dest='debug',
+                      help='True for logging, False for silent output',
+                      action='store', default=False, type=bool)
   
-  args = parser.parse_args()
-  return args
+  return parser.parse_args()
 
 args = parse_args()
 
@@ -42,6 +44,10 @@ class Handler(BaseHTTPRequestHandler):
     self.end_headers()
     self.wfile.write(str.encode("I'm a slow response LOL\n"))
     return
+  def log_message(self, format, *fargs):
+    if args.debug:
+      return super().log_message(format, *fargs)
+    return 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""

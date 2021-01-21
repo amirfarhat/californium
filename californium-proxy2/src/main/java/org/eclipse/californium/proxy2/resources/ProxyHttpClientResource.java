@@ -128,7 +128,7 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 		try {
 			// get the mapping to http for the incoming coap request
 			httpRequest = translator.getHttpRequest(destination, incomingCoapRequest);
-			LOGGER.debug("REQ " + incomingCoapRequest.getMID());
+			// LOGGER.debug("REQ " + incomingCoapRequest.getMID());
 		} catch (InvalidFieldException e) {
 			LOGGER.debug("Problems during the http/coap translation: {}", e.getMessage());
 			exchange.sendResponse(new Response(Coap2CoapTranslator.STATUS_FIELD_MALFORMED));
@@ -157,7 +157,7 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 					Response coapResponse = translator.getCoapResponse(result, incomingCoapRequest);
 					coapResponse.setNanoTimestamp(timestamp);
 					coapResponse.setMID(incomingCoapRequest.getMID());
-					LOGGER.debug("RES " + coapResponse.getMID());
+					// LOGGER.debug("RES " + coapResponse.getMID());
 					if (cache != null) {
 						cache.cacheResponse(cacheKey, coapResponse);
 					}
