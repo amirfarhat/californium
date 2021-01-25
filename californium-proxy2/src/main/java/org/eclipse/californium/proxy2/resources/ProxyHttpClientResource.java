@@ -56,6 +56,10 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 
 	private final Set<String> schemes = new HashSet<String>();
 
+	public static void DataLog(final String out) {
+		System.out.println("[DBG] " + System.nanoTime() + " " + out);	
+	}
+
 	/**
 	 * DefaultHttpClient is thread safe. It is recommended that the same
 	 * instance of this class is reused for multiple request executions.
@@ -91,6 +95,8 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 	@Override
 	public void handleRequest(final Exchange exchange) {
 		final Request incomingCoapRequest = exchange.getRequest();
+		DataLog("COAP_RECEIVED " + incomingCoapRequest.getMID() + "_" + incomingCoapRequest.getTokenString());
+		// DataLog("SIZE " + incomingCoapRequest.getBytes().length);
 
 		URI destination;
 		try {
@@ -143,10 +149,13 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 			exchange.sendAccept();
 		}
 
+		DataLog("COAP_TRANSLATED " + incomingCoapRequest.getMID() + "_" + incomingCoapRequest.getTokenString());
 		asyncClient.execute(httpHost, httpRequest, new BasicHttpContext(), new FutureCallback<HttpResponse>() {
 
 			@Override
 			public void completed(HttpResponse result) {
+				DataLog("HTTP_RECVD_SUCCESS " + incomingCoapRequest.getMID() + "_" + incomingCoapRequest.getTokenString());
+
 				try {
 					long timestamp = ClockUtil.nanoRealtime();
 					// the entity of the response, if non repeatable, could be
@@ -161,6 +170,7 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 					if (cache != null) {
 						cache.cacheResponse(cacheKey, coapResponse);
 					}
+					DataLog("HTTP_TRANSLATED " + incomingCoapRequest.getMID() + "_" + incomingCoapRequest.getTokenString());
 					exchange.sendResponse(coapResponse);
 				} catch (InvalidFieldException e) {
 					LOGGER.debug("Problems during the http/coap translation: {}", e.getMessage());
@@ -176,6 +186,8 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 
 			@Override
 			public void failed(Exception ex) {
+				DataLog("HTTP_RECVD_FAILED " + incomingCoapRequest.getMID() + "_" + incomingCoapRequest.getTokenString());
+
 				LOGGER.debug("Failed to get the http response: {}", ex.getMessage());
 				if (ex instanceof SocketTimeoutException) {
 					exchange.sendResponse(new Response(ResponseCode.GATEWAY_TIMEOUT));
@@ -186,6 +198,8 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 
 			@Override
 			public void cancelled() {
+				DataLog("HTTP_RECVD_CANCELLED " + incomingCoapRequest.getMID() + "_" + incomingCoapRequest.getTokenString());
+
 				LOGGER.debug("Request canceled");
 				exchange.sendResponse(new Response(ResponseCode.SERVICE_UNAVAILABLE));
 			}

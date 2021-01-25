@@ -1,9 +1,11 @@
 import datetime
 import argparse
 
+import numpy as np
 from icecream import ic
 import matplotlib.pyplot as plt
-from collections import namedtuple
+from recordclass import recordclass
+from collections import OrderedDict
 
 def parse_args():
   parser = argparse.ArgumentParser(description = 'Plot proxy req/res timing data')
@@ -14,61 +16,100 @@ def parse_args():
 
 args = parse_args()
 
-ProxyRecord = namedtuple('ProxyRecord', 'timestamp type message_id')
-
-min_timestamp = datetime.datetime.now().timestamp()
-min_message_id = float('inf')
-records = []
+ProxyRecord = recordclass('ProxyRecord', 'coap_recv coap_translate http_recv http_translate http_fail ')
+min_timestamp = float('inf')
+data = OrderedDict()
 
 with open(args.proxy_log, 'r') as f:
-  # Skip header: first two lines
-  f.readline()
-  f.readline()
-
   L = f.readline()
   while L:
-    # Parse and remove extra logging
-    parts = map(str.lower, L.split())
-    parts = filter(('debug').__ne__, parts)
-    parts = list(filter(('[proxyhttpclientresource]:').__ne__, parts))
-    
-    # Parse message type
-    if parts[1] in ['req', 'res']:
-      message_type = parts[1]
-    else:
-      # Some error
-      L = f.readline()
-      continue
+    # Line must be a custom debugging statement
+    dbg = L.replace("[DBG] ", "")
+    if len(dbg) < len(L):
 
-    # Parse timestamp
-    dt = datetime.datetime.strptime(f"2021 {parts[0]}", "%Y %H:%M:%S.%f")
-    timestamp = dt.timestamp()
+      # Parse log line. Example format:
+      # [DBG] 842877217958983 COAP_RECEIVED 44167_45FD2841
+      parts = dbg.split()
+      timestamp_ns = int(parts[0])
+      event = parts[1]
+      request_handle = parts[2]
 
-    # Parse message ID
-    message_id = int(parts[2])
+      min_timestamp = min(min_timestamp, timestamp_ns)
 
-    min_timestamp = min(min_timestamp, timestamp)
-    min_message_id = min(min_message_id, message_id)
-    
-    records.append(ProxyRecord(timestamp, message_type, message_id))
+      if event == "COAP_RECEIVED":
+        data[request_handle] = ProxyRecord(\
+          coap_recv=timestamp_ns,
+          coap_translate=None,
+          http_recv=None,
+          http_translate=None,
+          http_fail=True,
+        )
+        
+      elif event == "COAP_TRANSLATED":
+        data[request_handle].coap_translate = timestamp_ns
+
+      elif event == "HTTP_RECVD_SUCCESS":
+        data[request_handle].http_recv = timestamp_ns
+        data[request_handle].http_fail = False
+
+      elif event == "HTTP_TRANSLATED":
+        data[request_handle].http_translate = timestamp_ns
+
+      elif event == "HTTP_RECVD_FAILED":
+        data[request_handle].http_recv = timestamp_ns
+
+      elif event == "HTTP_RECVD_CANCELLED":
+        data[request_handle].http_recv = timestamp_ns
+
+      else:
+        raise Exception(f"Got {L}")
+
     L = f.readline()
 
-requests = list(filter(lambda r: r.type == 'req', records))
-responses = list(filter(lambda r: r.type == 'res', records))
+all_message_numbers = []
+message_numbers = []
+coap_translation_times = []
+request_return_times = []
+http_translation_times = []
+failed = 0
 
-ic(len(requests))
-ic(len(responses))
+for i, (request_handle, r) in enumerate(data.items()):
+  message_number = i + 1
+  all_message_numbers.append(message_number)
+  if r.http_translate:
+    message_numbers.append(message_number)
 
-groupings = [(requests, 'bo', 'Requests'), 
-             (responses, 'ro', 'Responses')]
+    coap_translation_time = r.coap_translate - r.coap_recv
+    coap_translation_times.append(coap_translation_time)
 
-for collection, color, label in groupings:
-  timestamps = list(map(lambda r: r.timestamp - min_timestamp, collection))
-  message_ids = list(map(lambda r: r.message_id - min_message_id, collection))
-  plt.plot(message_ids, timestamps, color, label=label)
+    request_return_time = r.http_recv - r.coap_translate
+    request_return_time *= 1e-9
+    request_return_times.append(request_return_time)
 
-plt.title('CoAP-HTTP Proxy Messages: Message ID vs Time')
-plt.xlabel('Message ID [int]')
-plt.ylabel('Time [sec]')
-plt.legend()
-plt.show()
+    
+    http_translation_time = r.http_translate - r.http_recv
+    http_translation_times.append(http_translation_time)
+  else:
+    failed += 1
+
+print(f"avg coap_translation_times = {np.average(coap_translation_times)}")
+print(f"avg request_return_times = {np.average(request_return_times)}")
+print(f"avg http_translation_times = {np.average(http_translation_times)}")
+print(f"failed proxy->server requests = {failed}/{len(all_message_numbers)}")
+
+# fig, ax = plt.subplots(2)
+
+# ax[0].bar(message_numbers, coap_translation_times, label="CoAP->HTTP Translation")
+# ax[0].bar(message_numbers, http_translation_times, label="HTTP-> Translation")
+# ax[0].set_title("Protocol Translation Duration Per Message")
+# ax[0].set_xlabel("Message Number")
+# ax[0].set_ylabel("Time Duration [nanosecond]")
+# ax[0].legend()
+
+# ax[1].bar(message_numbers, request_return_times, label="Proxy->Server RTT")
+# ax[1].set_title("Message RTT from Proxy to Server")
+# ax[1].set_xlabel("Message Number")
+# ax[1].set_ylabel("Time Duration [second]")
+# ax[1].legend()
+
+# plt.show()

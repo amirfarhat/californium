@@ -8,6 +8,7 @@ import struct
 import socket
 import random
 import argparse
+import threading
 
 from pprint import pprint
 from collections import OrderedDict
@@ -417,6 +418,40 @@ class CoAPMessage:
     """
     return random.randint(0, cls.MAX_MESSAGE_ID)
 
+class CoAPReceiver(threading.Thread):
+  MAX_RECV_SIZE = 4096
+
+  def __init__(self, sock):
+    super().__init__()
+    self.sock = sock
+
+  def run(self):
+    while True:
+      response = self.sock.recv(self.MAX_RECV_SIZE)
+      self.parse_raw_response(response)
+
+  @classmethod
+  def parse_raw_response(cls, response):
+    header_bytes = struct.unpack("!I", response[:4])[0]
+    print(header_bytes)
+
+    # Decode and chop off: Message ID
+    message_id = header_bytes & ((1 << 16) - 1)
+    print(f"message_id: {message_id}")
+    header_bytes >>= 16
+
+    # Decode and chop off: Code (Class|Detail)
+    code_bytes = header_bytes & ((1 << 8) - 1)
+    d = code_bytes & ((1 << 5) - 1)
+    code_bytes >>= 5
+    c = code_bytes & ((1 << 3) - 1)
+    code_bytes >>= 3
+    print(f"class: {c}.{d:02}")
+    header_bytes >>= 8
+
+    # Decode and chop off: Token Length
+
+
 def create_socket():
   """
   Create an IPv4 socket
@@ -468,19 +503,26 @@ def main():
   sock = create_socket()
   gen = coap_message_generator()
 
-  if args.flood:
+  # CoAPReceiver(sock).start()
+
+  try:
     sent = 0
-    while True:
-      message = next(gen)
-      send_coap_message(sock, message)
-      sent += 1
-      if sent % 5000 == 0:
-        print(f"Sent {sent}")
-  else:
-    for i in range(args.num_messages):
-      message = next(gen)
-      send_coap_message(sock, message)
-    print(f"Sent {args.num_messages}")
+    if args.flood:
+      while True:
+        message = next(gen)
+        send_coap_message(sock, message)
+        sent += 1
+    else:
+      for i in range(args.num_messages):
+        message = next(gen)
+        send_coap_message(sock, message)
+        sent += 1
+        # time.sleep(0.01) 
+  except():
+    print(f"Sent {sent}")
+    sys.exit()
+    return
+  print(f"Sent {sent}")
 
 if __name__ == "__main__":
   import doctest
