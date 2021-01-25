@@ -517,8 +517,7 @@ def main():
         message = next(gen)
         send_coap_message(sock, message)
         sent += 1
-        # time.sleep(0.01) 
-  except():
+  except KeyboardInterrupt:
     print(f"Sent {sent}")
     sys.exit()
     return

@@ -8,6 +8,14 @@ then
 	my_ip=`hostname -I | awk '{ printf $1 }'`
 fi
 
+me=`basename "$0"`
+
+control_c() {
+  echo "$me KILLED"
+}
+
+trap control_c SIGINT
+
 sudo python3 coapspoofer.py \
   --debug \
   --source $my_ip \
@@ -19,4 +27,4 @@ sudo python3 coapspoofer.py \
   --uri-host $proxy_ip \
   --uri-path coap2http \
   --proxy-uri http://$origin_ip:8000 \
-  --flood True
+  --num-messages 10
