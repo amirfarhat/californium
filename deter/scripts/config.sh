@@ -1,0 +1,1 @@
+CF_HOME=/proj/MIT-DoS/exp/coap-setup/deps/californium
