@@ -9,7 +9,7 @@ then
 fi
 
 # Install network utilities
-sudo apt install -y iperf traceroute
+sudo apt install -y iperf traceroute moreutils
 
 # Install Java: JDK, JRE
 sudo apt install -y default-jdk default-jre
