@@ -1,3 +1,4 @@
+#!/bin/bash
 
 . /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 

@@ -1,3 +1,4 @@
+#!/bin/bash
 
 . /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
@@ -24,18 +25,18 @@ log "Created data directory $data_dir\n"
 # Kill all detached remote sessions
 for host_name in ${HOST_NAMES[@]}; do
   log "Killing detached sessions on $host_name...\n"
-  ssh $RUN_USER@$host_name "$BIN_HOME/kill_detached.sh"
+  ssh $RUN_USER@$host_name "sudo $BIN_HOME/kill_detached.sh"
   log "OK\n"
 done
 
 # Origin server
 log "[SETUP] Starting origin server...\n"
-ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_origin_server.sh -v"
+ssh $RUN_USER@$PROXY_NAME "sudo $SCRIPTS_HOME/start_origin_server.sh -v"
 log "OK\n"
 
 # Proxy
 log "[SETUP] Starting proxy...\n"
-ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_proxy.sh -v"
+ssh $RUN_USER@$PROXY_NAME "sudo $SCRIPTS_HOME/start_proxy.sh -v"
 log "OK\n"
 
 log "Sleeping for a bit...\n"
@@ -44,7 +45,7 @@ log "OK\n"
 
 # Attacker
 log "[SETUP] Starting attackers...\n"
-ssh $RUN_USER@$ATTACKER_NAME "$SCRIPTS_HOME/start_attacker.sh -v"
+ssh $RUN_USER@$ATTACKER_NAME "sudo $SCRIPTS_HOME/start_attacker.sh -v"
 log "OK\n"
 
 sleep_amt=$(( $PROXY_DURATION ))
@@ -55,7 +56,7 @@ log "OK\n"
 # Move data files from tmp into the data directory
 for host_name in ${HOST_NAMES[@]}; do
   log "Moving data from $host_name to $data_dir...\n"
-  ssh $RUN_USER@$host_name "$BIN_HOME/move_data.sh $data_dir"
+  ssh $RUN_USER@$host_name "sudo $BIN_HOME/move_data.sh $data_dir"
   log "OK\n"
 done
 

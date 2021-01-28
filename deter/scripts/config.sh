@@ -1,3 +1,4 @@
+#!/bin/bash
 
 CF_HOME=/proj/MIT-DoS/exp/coap-setup/deps/californium
 DETER_HOME=$CF_HOME/deter
