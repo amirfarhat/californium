@@ -18,5 +18,4 @@ function log () {
 
 # Attacker
 log "[SETUP] Starting attackers...\n"
-# screen -d -m ssh amirf@ATTACKER_NAME "sudo screen -d -m $SCRIPTS_HOME/start_attacker.sh -v"
-ssh $RUN_USER@$ATTACKER_NAME "sudo screen -d -m $SCRIPTS_HOME/start_attacker.sh -v"
+screen -d -m ssh amirf@ATTACKER_NAME "sudo screen -d -m $SCRIPTS_HOME/start_attacker.sh -v"
