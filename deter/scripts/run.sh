@@ -2,9 +2,10 @@
 . /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
 # Options
-while getopts ":v" opt; do
+while getopts ":v:n:" opt; do
   case "$opt" in
     "v") _V=1;;
+    "n") n=$OPTARG;;
   esac
 done
 
@@ -14,6 +15,9 @@ function log () {
     printf "$@"
   fi
 }
+
+mkdir -p $TMP_DATA
+mdkir -p $DETER_HOME/expdata/real/$n
 
 # Origin server
 log "[SETUP] Starting origin server...\n"
@@ -27,4 +31,8 @@ ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_proxy.sh -v"
 log "[SETUP] Starting attackers...\n"
 ssh $RUN_USER@$ATTACKER_NAME "$SCRIPTS_HOME/start_attacker.sh -v"
 
-sleep 15
+sleep_amt=$(( $ATTACKER_DURATION + $ORIGIN_SERVER_DURATION + $PROXY_DURATION ))
+log "[SETUP] Waiting for $sleep_amt seconds...\n"
+sleep $sleep_amt
+
+
