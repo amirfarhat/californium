@@ -27,6 +27,9 @@ ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_origin_server.sh -v"
 log "[SETUP] Starting proxy...\n"
 ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_proxy.sh -v"
 
+log "Sleeping for a bit...\n"
+sleep5
+
 # Attacker
 log "[SETUP] Starting attackers...\n"
 ssh $RUN_USER@$ATTACKER_NAME "$SCRIPTS_HOME/start_attacker.sh -v"
