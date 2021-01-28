@@ -31,7 +31,7 @@ done
 
 # Origin server
 log "[SETUP] Starting origin server...\n"
-ssh $RUN_USER@$PROXY_NAME "sudo $SCRIPTS_HOME/start_origin_server.sh -v"
+ssh $RUN_USER@$ORIGIN_SERVER_NAME "sudo $SCRIPTS_HOME/start_origin_server.sh -v"
 log "OK\n"
 
 # Proxy
