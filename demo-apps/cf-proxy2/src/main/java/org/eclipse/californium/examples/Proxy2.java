@@ -31,6 +31,7 @@ public class Proxy2 {
 	private static final String SECURE_PROXY = ExampleSecureProxy2.class.getSimpleName();
 	private static final String COAP_CLIENT = ExampleProxy2CoapClient.class.getSimpleName();
 	private static final String HTTP_CLIENT = ExampleProxy2HttpClient.class.getSimpleName();
+	private static final String AYNC_HTTP_CLIENT = ExampleHttpClient.class.getSimpleName();
 	private static final String COAP_SERVER = ExampleCoapServer.class.getSimpleName();
 	private static final String HTTP_SERVER = ExampleHttpServer.class.getSimpleName();
 
@@ -61,6 +62,9 @@ public class Proxy2 {
 				return;
 			} else if (BASIC_FORWARDING_PROXY_2.equals(start)) {
 				BasicForwardingProxy2.main(args2);
+				return;
+			} else if (AYNC_HTTP_CLIENT.equals(start)) {
+				ExampleHttpClient.main(args2);
 				return;
 			}
 		}

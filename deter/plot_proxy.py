@@ -12,9 +12,11 @@ def parse_args():
   parser.add_argument('-p', '--proxy-log', dest='proxy_log',
                       help='Proxy operation log', action='store',
                       default="pxy_waterfall_same_host", type=str)
+  parser.add_argument('-g', '--graph', dest='graph', action='store_true')
   return parser.parse_args()
 
 args = parse_args()
+print(args)
 
 ProxyRecord = recordclass('ProxyRecord', 'coap_recv coap_translate http_recv http_translate http_fail ')
 min_timestamp = float('inf')
@@ -80,6 +82,7 @@ for i, (request_handle, r) in enumerate(data.items()):
     message_numbers.append(message_number)
 
     coap_translation_time = r.coap_translate - r.coap_recv
+    coap_translation_time *= 1e-6 
     coap_translation_times.append(coap_translation_time)
 
     request_return_time = r.http_recv - r.coap_translate
@@ -88,6 +91,7 @@ for i, (request_handle, r) in enumerate(data.items()):
 
     
     http_translation_time = r.http_translate - r.http_recv
+    http_translation_time *= 1e-6
     http_translation_times.append(http_translation_time)
   else:
     failed += 1
@@ -97,19 +101,23 @@ print(f"avg request_return_times = {np.average(request_return_times)}")
 print(f"avg http_translation_times = {np.average(http_translation_times)}")
 print(f"failed proxy->server requests = {failed}/{len(all_message_numbers)}")
 
-# fig, ax = plt.subplots(2)
+if args.graph:
+  fig, ax = plt.subplots(3)
 
-# ax[0].bar(message_numbers, coap_translation_times, label="CoAP->HTTP Translation")
-# ax[0].bar(message_numbers, http_translation_times, label="HTTP-> Translation")
-# ax[0].set_title("Protocol Translation Duration Per Message")
-# ax[0].set_xlabel("Message Number")
-# ax[0].set_ylabel("Time Duration [nanosecond]")
-# ax[0].legend()
+  ax[0].plot(message_numbers, coap_translation_times, label="CoAP->HTTP Translation")
+  ax[0].set_title("CoAP->HTTP Protocol Translation Duration Per Message")
+  ax[0].set_ylabel("Time Duration [nanosecond]")
+  ax[0].legend()
 
-# ax[1].bar(message_numbers, request_return_times, label="Proxy->Server RTT")
-# ax[1].set_title("Message RTT from Proxy to Server")
-# ax[1].set_xlabel("Message Number")
-# ax[1].set_ylabel("Time Duration [second]")
-# ax[1].legend()
+  ax[1].plot(message_numbers, http_translation_times, label="HTTP->CoAP Translation")
+  ax[1].set_title("HTTP->CoAP Protocol Translation Duration Per Message")
+  ax[1].set_ylabel("Time Duration [nanosecond]")
+  ax[1].legend()
 
-# plt.show()
+  ax[2].plot(message_numbers, request_return_times, label="Proxy->Server RTT")
+  ax[2].set_title("Message RTT from Proxy to Server")
+  ax[2].set_xlabel("Message Number")
+  ax[2].set_ylabel("Time Duration [second]")
+  ax[2].legend()
+
+  plt.show()

@@ -27,4 +27,7 @@ sudo python3 coapspoofer.py \
   --uri-host $proxy_ip \
   --uri-path coap2http \
   --proxy-uri http://$origin_ip:8000 \
-  --num-messages 10
+  --num-messages 10 &
+sleep 5
+p=$!
+kill $p

@@ -1,6 +1,20 @@
 storage/
 bin/
 # run/
+deter/expdata/local/
+demo-apps/run/cf-benchmark-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-benchmark-observe-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-cocoa-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-extplugtest-server-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-helloworld-server-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-helloworld-client-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-plugtest-server-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-proxy-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-secure-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-simplefile-server-3.0.0-SNAPSHOT.jar
+demo-apps/run/cf-unix-setup-3.0.0-SNAPSHOT.jar
+demo-apps/run/sc-dtls-example-client-3.0.0-SNAPSHOT.jar
+demo-apps/run/sc-dtls-example-server-3.0.0-SNAPSHOT.jar
 outs/
 run/demo-apps*.pom
 test_out/
