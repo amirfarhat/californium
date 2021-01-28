@@ -1,4 +1,3 @@
-#!/bin/bash
 
 source ./config.sh
 source ./setup.sh
