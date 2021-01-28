@@ -1,5 +1,5 @@
 
-source ./config.sh
+source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
 # Options
 while getopts ":v" opt; do
@@ -18,3 +18,5 @@ function log () {
 # Attacker
 log "[SETUP] Starting attackers...\n"
 ssh $RUN_USER@$ATTACKER_NAME "$SCRIPTS_HOME/start_attacker.sh -v"
+
+sleep 15

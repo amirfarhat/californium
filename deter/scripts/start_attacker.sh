@@ -1,6 +1,8 @@
 
-source ./config.sh
-source ./setup.sh
+source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
+#source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/node_setup.sh
+
+pwd
 
 # Options
 while getopts ":v" opt; do
@@ -16,10 +18,12 @@ function log () {
   fi
 }
 
+mkdir -p $TMP_DATA
+
 if [[ $TCPDUMP -eq 1 ]]; then
   log "Running attacker_tcpdump...\n"
   screen -d -m sudo $BIN_HOME/attacker_tcpdump.sh
 fi
 
 log "Running attacker_flood...\n"
-screen -d -m $BIN_HOME/attacker_flood.sh
+screen -d -m sudo $BIN_HOME/attacker_flood.sh
