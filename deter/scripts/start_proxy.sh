@@ -15,12 +15,12 @@ function log () {
   fi
 }
 
-# Proxy
-log "[SETUP] Starting proxy...\n"
-ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_proxy.sh -v"
+mkdir -p $TMP_DATA
 
-# Attacker
-log "[SETUP] Starting attackers...\n"
-ssh $RUN_USER@$ATTACKER_NAME "$SCRIPTS_HOME/start_attacker.sh -v"
+if [[ $TCPDUMP -eq 1 ]]; then
+  log "Running proxy_tcpdump...\n"
+  screen -d -m sudo $BIN_HOME/proxy_tcpdump.sh
+fi
 
-sleep 15
+log "Running proxy...\n"
+screen -d -m sudo $BIN_HOME/proxy_run.sh

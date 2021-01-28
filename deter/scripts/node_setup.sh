@@ -1,6 +1,4 @@
-#!/bin/bash
-
-source ./config.sh
+. /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
 # Expect:
 # Forked californium from source: https://github.com/amirfarhat/californium
