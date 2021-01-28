@@ -8,7 +8,7 @@ if [ $node_type = "proxy" ]; then
   sleep_amt=$PROXY_DURATION
   rm -f $TMP_DATA/$PROXY_TCPDUMP
   touch $TMP_DATA/$PROXY_TCPDUMP
-  tcpdump -i any port '(8000 or 5683)' $TMP_DATA/$PROXY_TCPDUMP &
+  tcpdump -i any port '(8000 or 5683)' -w $TMP_DATA/$PROXY_TCPDUMP &
 elif [ $node_type = "attacker" ]; then
   sleep_amt=$ATTACKER_DURATION
   rm -f $TMP_DATA/$ATTACKER_TCPDUMP
