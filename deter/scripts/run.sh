@@ -50,7 +50,12 @@ log "OK\n"
 
 sleep_amt=$(( $PROXY_DURATION ))
 log "[SETUP] Waiting for $sleep_amt seconds...\n"
-sleep $sleep_amt
+secs=$sleep_amt
+while [ $secs -gt 0 ]; do
+  echo -ne "$secs\033[0K\r"
+  sleep 1
+  : $((secs--))
+done
 log "OK\n"
 
 # Move data files from tmp into the data directory
