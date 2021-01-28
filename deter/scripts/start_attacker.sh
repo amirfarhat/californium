@@ -1,8 +1,5 @@
 
-source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
-#source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/node_setup.sh
-
-pwd
+. /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
 # Options
 while getopts ":v" opt; do

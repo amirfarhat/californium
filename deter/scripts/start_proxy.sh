@@ -19,7 +19,7 @@ mkdir -p $TMP_DATA
 
 if [[ $TCPDUMP -eq 1 ]]; then
   log "Running proxy_tcpdump...\n"
-  screen -d -m sudo $BIN_HOME/proxy_tcpdump.sh
+  screen -d -m sudo $BIN_HOME/proxy_tcpdump.sh proxy
 fi
 
 log "Running proxy...\n"
