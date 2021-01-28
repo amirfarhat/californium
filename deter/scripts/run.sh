@@ -15,6 +15,10 @@ function log () {
   fi
 }
 
+# Origin server
+log "[SETUP] Starting origin server...\n"
+ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_origin_server.sh -v"
+
 # Proxy
 log "[SETUP] Starting proxy...\n"
 ssh $RUN_USER@$PROXY_NAME "$SCRIPTS_HOME/start_proxy.sh -v"

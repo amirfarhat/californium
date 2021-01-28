@@ -13,7 +13,7 @@ elif [ $node_type = "attacker" ]; then
   rm -f $TMP_DATA/$ATTACKER_TCPDUMP
   touch $TMP_DATA/$ATTACKER_TCPDUMP
   tcpdump -i any udp port 5683 -w $TMP_DATA/$ATTACKER_TCPDUMP &
-elif [ $node_type = "originserver" ]; then
+elif [ $node_type = "origin_server" ]; then
   sleep_amt=$ORIGIN_SERVER_DURATION
   rm -f $TMP_DATA/$ORIGIN_SERVER_TCPDUMP
   touch $TMP_DATA/$ORIGIN_SERVER_TCPDUMP
