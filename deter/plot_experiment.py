@@ -138,11 +138,10 @@ for run_dir_name in sorted(os.listdir(args.experiment_directory)):
     ax[0, 1].legend()
 
     label = f"Percent of Failed Requests - Run {run_number}"
-    ax[1, 1].plot(run_number, pct_failed_requests, 'x', label=label)
+    ax[1, 1].bar(run_number, pct_failed_requests, label=label)
     ax[1, 1].set_title("Percent of Failed Requests Per Trial Run")
     ax[1, 1].set_xlabel("Trial Number")
     ax[1, 1].set_ylabel("Percent of Failed Requests")
-    ax[1, 1].legend()
 
 if args.graph:
   plt.show()
