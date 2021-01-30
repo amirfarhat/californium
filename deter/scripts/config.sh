@@ -20,7 +20,9 @@ ORIGIN_SERVER_NAME="originserver.coap-setup.MIT-DoS.isi.deterlab.net"
 ORIGIN_SERVER_TCPDUMP="server_dump.pcap"
 ORIGIN_SERVER_LOGNAME="server.log"
 ORIGIN_SERVER_IP="10.1.2.3"
+ORIGIN_SERVER_PORT=80
 ORIGIN_SERVER_DURATION=300
+ORIGIN_SERVER_APACHE=1
 
 PROXY_NAME="proxy.coap-setup.MIT-DoS.isi.deterlab.net"
 PROXY_TCPDUMP="proxy_dump.pcap"

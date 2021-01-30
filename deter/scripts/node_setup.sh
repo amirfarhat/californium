@@ -11,7 +11,10 @@ then
 fi
 
 # Install utilities
-sudo apt install -y iperf traceroute moreutils apache2
+sudo apt install -y iperf traceroute moreutils apache2 httpie
 
 # Install Java: JDK, JRE
 sudo apt install -y default-jdk default-jre
+
+# Set small index.html as Apache homepage
+sudo mv $DETER_HOME/utils/index.html /var/www/html/index.html
