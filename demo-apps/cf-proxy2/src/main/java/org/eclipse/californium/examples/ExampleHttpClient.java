@@ -42,26 +42,45 @@ public class ExampleHttpClient {
   }
 
   public static void main(String args[]) throws InterruptedException {
-    // final int n = Integer.parseInt(args[0]);
-    int n = 1;
+    String destinationHostIn = null;
+    int destinationPortIn = -1;
+    int logStartWindowIn = -1;
+    int logEndWindowIn = -1;
 
-    final String destinationHost = "127.0.0.1";
-    final int destinationPort = 8000;
+    if (args.length != 4) {
+      System.err.println("Need [destinationHost] [destinationPort] [logStartWindow] [logEndWindow]");
+      System.exit(1);
+    } else {
+      destinationHostIn = args[0];
+      destinationPortIn = Integer.parseInt(args[1]);
+      logStartWindowIn = Integer.parseInt(args[2]);
+      logEndWindowIn = Integer.parseInt(args[3]);
+      if (logEndWindowIn < logStartWindowIn) {
+        throw new RuntimeException("Bad args");
+      }
+    }
+
+    final String destinationHost = destinationHostIn;
+    final int destinationPort = destinationPortIn;
+    final int startWindow = (int) Math.pow(2, logStartWindowIn);
+    final int endWindow = (int) Math.pow(2, logEndWindowIn);
     
     httpHost = new HttpHost(destinationHost, destinationPort);
     httpRequest = new HttpGet("http://" + destinationHost + ":" + destinationPort);
 
-    for (int k = 0; k < 1000; k++) {
-      if (n == 262144) {
-        System.exit(0);
-      }
+    int n = startWindow;
+    while (n < endWindow) {
       System.out.println("==================== " + n);
+
       latch = new CountDownLatch(n);
       for (int i = 0; i < n; i++) {
         sendRequest(i);
       }
       latch.await();
+
       n *= 2;
     }
+    
+    System.exit(0);
 	}
 }
