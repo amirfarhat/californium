@@ -253,7 +253,8 @@ class CoAPMessage:
     self.options = OrderedDict()
     self.options['uri_host']  = (3,  args.uri_host),
     self.options['uri_path']  = (11, args.uri_path),
-    self.options['proxy_uri'] = (35, f"{args.proxy_uri}/{proxy_uri_suffix}"),
+    # self.options['proxy_uri'] = (35, f"{args.proxy_uri}/{proxy_uri_suffix}"),
+    self.options['proxy_uri'] = (35, f"{args.proxy_uri}"),
 
     self.payload = bytes(args.payload, "utf-8")
 
