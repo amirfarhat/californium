@@ -10,8 +10,8 @@ then
   exit 1
 fi
 
-# Install network utilities
-sudo apt install -y iperf traceroute moreutils
+# Install utilities
+sudo apt install -y iperf traceroute moreutils apache2
 
 # Install Java: JDK, JRE
 sudo apt install -y default-jdk default-jre
