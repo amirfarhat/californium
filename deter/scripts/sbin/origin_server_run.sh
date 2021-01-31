@@ -5,10 +5,14 @@
 rm -f $TMP_DATA/$ORIGIN_SERVER_LOGNAME
 touch $TMP_DATA/$ORIGIN_SERVER_LOGNAME
 
-(python3 $DETER_HOME/multislowserver.py -p 8000 -d 1 -x True > $TMP_DATA/$ORIGIN_SERVER_LOGNAME 2>&1) &
+if [[ $ORIGIN_SERVER_APACHE -eq 1 ]]; then
+  sudo /etc/init.d/apache2 start
+  sleep $ORIGIN_SERVER_DURATION
+  sudo /etc/init.d/apache2 stop
 
-server_pid=$!
-
-sleep $ORIGIN_SERVER_DURATION
-
-kill $server_pid
+else
+  (python3 $DETER_HOME/multislowserver.py -p $ORIGIN_SERVER_PORT -d 1 -x True > $TMP_DATA/$ORIGIN_SERVER_LOGNAME 2>&1) &
+  server_pid=$!
+  sleep $ORIGIN_SERVER_DURATION
+  kill $server_pid
+fi
