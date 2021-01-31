@@ -84,7 +84,7 @@ plt.plot(message_numbers, second_timestamps, 'ro', label="Proxy Timestamp")
 
 plt.xlabel("Message Index")
 plt.ylabel("Time [sec]")
-plt.title("CoAP Packet Timestamps")
+plt.title(f"CoAP Packet Timestamps\n{args.wireshark_csv}")
 
 plt.legend()
 plt.show()

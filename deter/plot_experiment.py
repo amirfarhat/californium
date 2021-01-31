@@ -74,6 +74,8 @@ def populate_from_run(proxy_file):
   http_translation_times = []
   failed = 0
 
+  MAX_UP = 10_000
+
   for i, (request_handle, r) in enumerate(data.items()):
     message_number = i + 1
     all_message_numbers.append(message_number)
