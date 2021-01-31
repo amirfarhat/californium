@@ -18,3 +18,6 @@ sudo apt install -y default-jdk default-jre
 
 # Set small index.html as Apache homepage
 sudo cp $DETER_HOME/utils/index.html /var/www/html/index.html
+
+# Set custom bashrc
+sudo cp $DETER_HOME/utils/.bashrc ~/.bashrc
