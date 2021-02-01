@@ -79,6 +79,8 @@ public class BasicForwardingProxy2 {
 
 	private static final String COAP2HTTP = "coap2http";
 
+	public static boolean doDataLogging;
+
 	private CoapServer coapProxyServer;
 
 	public BasicForwardingProxy2(NetworkConfig config) throws IOException {
@@ -98,6 +100,7 @@ public class BasicForwardingProxy2 {
 	}
 
 	public static void main(String args[]) throws IOException {
+		doDataLogging = (args.length > 0);
 		NetworkConfig proxyConfig = NetworkConfig.createWithFile(CONFIG_FILE, CONFIG_HEADER, DEFAULTS);
 		BasicForwardingProxy2 proxy = new BasicForwardingProxy2(proxyConfig);
 		System.out.println(BasicForwardingProxy2.class.getSimpleName() + " started.");
