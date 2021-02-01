@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
+source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
 rm -f $TMP_DATA/$PROXY_LOGNAME
 touch $TMP_DATA/$PROXY_LOGNAME
