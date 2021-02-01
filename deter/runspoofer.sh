@@ -9,13 +9,14 @@ then
 fi
 
 me=`basename "$0"`
+coap_port=5683
 
 sudo python3 coapspoofer.py \
   --debug \
   --source $my_ip \
   --src-port 7123 \
   --destination $proxy_ip \
-  --dst-port 5683 \
+  --dst-port $coap_port \
   --message-type CON \
   --code 001 \
   --uri-host $proxy_ip \

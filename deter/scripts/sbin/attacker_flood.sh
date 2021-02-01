@@ -12,7 +12,7 @@ my_ip="8.8.8.8"
   --source $my_ip \
   --src-port 7123 \
   --destination $PROXY_IP \
-  --dst-port 5683 \
+  --dst-port $PROXY_COAP_PORT \
   --message-type CON \
   --code 001 \
   --uri-host $PROXY_IP \
