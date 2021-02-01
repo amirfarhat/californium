@@ -1,6 +1,7 @@
 storage/
 bin/
 # run/
+.vscode
 deter/expdata/local/
 deter/expdata
 demo-apps/run/cf-benchmark-3.0.0-SNAPSHOT.jar
