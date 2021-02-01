@@ -15,6 +15,8 @@ ATTACKER_NAME="attacker.coap-setup.MIT-DoS.isi.deterlab.net"
 ATTACKER_TCPDUMP="attacker_dump.pcap"
 ATTACKER_LOGNAME="attacker.log"
 ATTACKER_IP="10.1.1.2"
+ATTACKER_SPOOFED_IP="8.8.8.8"
+ATTACKER_SPOOFED_PORT="7123"
 ATTACKER_DURATION=20
 
 ORIGIN_SERVER_NAME="originserver.coap-setup.MIT-DoS.isi.deterlab.net"
@@ -28,7 +30,7 @@ PROXY_NAME="proxy.coap-setup.MIT-DoS.isi.deterlab.net"
 PROXY_TCPDUMP="proxy_dump.pcap"
 PROXY_LOGNAME="proxy.log"
 PROXY_IP="10.1.1.3"
-PROXY_COAP_PORT=5683
+PROXY_COAP_PORT="5683"
 PROXY_DURATION=$ORIGIN_SERVER_DURATION
 
 RUN_USER="amirf"

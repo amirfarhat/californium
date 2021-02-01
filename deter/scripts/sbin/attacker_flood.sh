@@ -5,12 +5,10 @@ source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 rm -f $TMP_DATA/$ATTACKER_LOGNAME
 touch $TMP_DATA/$ATTACKER_LOGNAME
 
-my_ip="8.8.8.8"
-
 (python3 $DETER_HOME/coapspoofer.py \
   --debug \
-  --source $my_ip \
-  --src-port 7123 \
+  --source $ATTACKER_SPOOFED_IP \
+  --src-port $ATTACKER_SPOOFED_PORT \
   --destination $PROXY_IP \
   --dst-port $PROXY_COAP_PORT \
   --message-type CON \
