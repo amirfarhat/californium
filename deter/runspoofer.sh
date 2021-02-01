@@ -10,12 +10,6 @@ fi
 
 me=`basename "$0"`
 
-control_c() {
-  echo "$me KILLED"
-}
-
-trap control_c SIGINT
-
 sudo python3 coapspoofer.py \
   --debug \
   --source $my_ip \
@@ -26,8 +20,5 @@ sudo python3 coapspoofer.py \
   --code 001 \
   --uri-host $proxy_ip \
   --uri-path coap2http \
-  --proxy-uri http://$origin_ip:8000 \
-  --num-messages 10 &
-sleep 5
-p=$!
-kill $p
+  --proxy-uri http://$origin_ip:80 \
+  --num-messages 10

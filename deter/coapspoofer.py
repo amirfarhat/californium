@@ -77,7 +77,7 @@ def parse_args():
   args = parser.parse_args()
   
   # Platform-specific config
-  args.local = True if (os.uname().nodename == 'Amirs-MBP') else False
+  args.local = True if (os.uname().nodename.startswith('Amir')) else False
   return args
   
 args = parse_args()
