@@ -11,7 +11,7 @@ if [ $node_type = "proxy" ]; then
   eval "tcpdump -i any port '($ORIGIN_SERVER_PORT or $PROXY_COAP_PORT)' -w $TMP_DATA/$PROXY_TCPDUMP &"
 
 elif [ $node_type = "attacker" ]; then
-  sleep_amt=$ATTACKER_DURATION
+  sleep_amt=$PROXY_DURATION
   rm -f $TMP_DATA/$ATTACKER_TCPDUMP
   touch $TMP_DATA/$ATTACKER_TCPDUMP
   tcpdump -i any udp port $PROXY_COAP_PORT -w $TMP_DATA/$ATTACKER_TCPDUMP &
