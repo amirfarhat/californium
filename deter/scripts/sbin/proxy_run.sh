@@ -5,7 +5,13 @@ source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 rm -f $TMP_DATA/$PROXY_LOGNAME
 touch $TMP_DATA/$PROXY_LOGNAME
 
-((java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2) > $TMP_DATA/$PROXY_LOGNAME) &
+if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
+  proxy_args="log"
+else
+  proxy_args=""
+fi
+
+((java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_args) > $TMP_DATA/$PROXY_LOGNAME) &
 
 proxy_pid=$!
 
