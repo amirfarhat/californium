@@ -54,27 +54,19 @@ import org.slf4j.LoggerFactory;
 public class ProxyHttpClientResource extends ProxyCoapResource {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProxyHttpClientResource.class);
-	
-	private final static DateFormat dateFormat = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss.SSSSSS");
 
 	private final Coap2HttpTranslator translator;
 	private final Set<String> schemes = new HashSet<String>();
 	private boolean doDataLogging = true;
-	private boolean firstMessage = true;
-	private long firstNs;
+	
+	private long currTime = -1;
 
-	public void DataLog(final String out) {
+	private void DataLog(final String out) {
 		if (!doDataLogging){
 			return;
 		}
-		if (firstMessage){
-			firstMessage = false;
-			firstNs = System.nanoTime();
-			final String formattedDate = dateFormat.format(new Date(System.currentTimeMillis()));
-			System.out.println("[DBG] " + formattedDate + " " + out);	
-		} else {
-			System.out.println("[DBG] " + (System.nanoTime() - firstNs) + " " + out);	
-		}
+		currTime = System.currentTimeMillis();
+		System.out.println("[DBG] " + currTime + " " + out);	
 	}
 
 	/**
@@ -234,4 +226,7 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 		return Collections.unmodifiableSet(schemes);
 	}
 
+	public void setDataLogging(boolean doDataLogging) {
+		this.doDataLogging = doDataLogging;
+	}
 }

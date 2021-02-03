@@ -17,6 +17,9 @@ package org.eclipse.californium.examples.basic;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.config.NetworkConfig;
@@ -79,30 +82,35 @@ public class BasicForwardingProxy2 {
 
 	private static final String COAP2HTTP = "coap2http";
 
-	public static boolean doDataLogging;
 
 	private CoapServer coapProxyServer;
 
-	public BasicForwardingProxy2(NetworkConfig config) throws IOException {
+	public BasicForwardingProxy2(NetworkConfig config, boolean doDataLogging) throws IOException {
 		// initialize http clients
 		HttpClientFactory.setNetworkConfig(config);
+
 		// initialize coap-server
 		int port = config.getInt(Keys.COAP_PORT);
 		coapProxyServer = new CoapServer(config, port);
+
 		// initialize proxy resource
-		ProxyCoapResource coap2http = new ProxyHttpClientResource(COAP2HTTP, false, false, null);
+		ProxyHttpClientResource coap2http = new ProxyHttpClientResource(COAP2HTTP, false, false, null);
+		coap2http.setDataLogging(doDataLogging);
+
 		// initialize proxy message deviverer
 		ForwardProxyMessageDeliverer proxyMessageDeliverer = new ForwardProxyMessageDeliverer(coap2http);
+
 		// set proxy message deviverer
 		coapProxyServer.setMessageDeliverer(proxyMessageDeliverer);
+		
 		coapProxyServer.start();
 		System.out.println("** CoAP Proxy at: coap://localhost:" + port);
 	}
 
 	public static void main(String args[]) throws IOException {
-		doDataLogging = (args.length > 0);
+		final boolean doDataLogging = (args.length > 0);
 		NetworkConfig proxyConfig = NetworkConfig.createWithFile(CONFIG_FILE, CONFIG_HEADER, DEFAULTS);
-		BasicForwardingProxy2 proxy = new BasicForwardingProxy2(proxyConfig);
+		BasicForwardingProxy2 proxy = new BasicForwardingProxy2(proxyConfig, doDataLogging);
 		System.out.println(BasicForwardingProxy2.class.getSimpleName() + " started.");
 	}
 }
