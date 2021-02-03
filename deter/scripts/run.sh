@@ -95,4 +95,9 @@ for ((i=1; i<=$_N; i++)); do
   done
 done
 
+# Zip experiment directory for super fast network transfer
+log "[SETUP] Zipping data files...\n"
+zip -r $experiment_dir.zip $experiment_dir
+log "OK\n"
+
 log "[CHECKPOINT] Finished experiment!\n"
