@@ -1,6 +1,16 @@
 #!/bin/bash
 
-CF_HOME=/proj/MIT-DoS/exp/coap-setup/deps/californium
+host_name=$(hostname | awk '{print tolower($0)}')
+
+# Determine where home is based on host
+if [[ $host_name == *"deter"* ]]; then
+  CF_HOME=/proj/MIT-DoS/exp/coap-setup/deps/californium
+elif [[ $host_name == *"amir"* ]]; then
+  CF_HOME=/Users/amirfarhat/workplace/research/californium
+else
+  CF_HOME=~/californium
+fi
+
 DETER_HOME=$CF_HOME/deter
 SCRIPTS_HOME=$DETER_HOME/scripts
 BIN_HOME=$SCRIPTS_HOME/sbin
