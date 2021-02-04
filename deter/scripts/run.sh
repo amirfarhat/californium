@@ -57,12 +57,12 @@ for ((i=1; i<=$_N; i++)); do
     log "OK\n"
   done
 
-  # Run setup script just in case
-  for host_name in ${HOST_NAMES[@]}; do
-    log "[SETUP] Running setup script on $host_name...\n"
-    ssh $RUN_USER@$host_name "sudo $SCRIPTS_HOME/node_setup.sh"
-    log "OK\n"
-  done
+  # # Run setup script just in case
+  # for host_name in ${HOST_NAMES[@]}; do
+  #   log "[SETUP] Running setup script on $host_name...\n"
+  #   ssh $RUN_USER@$host_name "sudo $SCRIPTS_HOME/node_setup.sh"
+  #   log "OK\n"
+  # done
 
   # Origin server
   log "[LAUNCH] Starting origin server...\n"
