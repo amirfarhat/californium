@@ -9,4 +9,4 @@ tshark \
   -2 \
   -n \
   -R "(coap) && (coap.type == 0)" \
-  -t ad > $2
+  -t e > $2
