@@ -11,7 +11,7 @@ then
 fi
 
 # Install utilities
-sudo apt install -y iperf traceroute moreutils apache2 httpie
+sudo apt install -y iperf traceroute moreutils apache2 httpie linux-tools-generic
 
 # Install Java: JDK, JRE
 sudo apt install -y default-jdk default-jre
