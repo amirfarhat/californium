@@ -1,6 +1,12 @@
 #!/bin/bash
 
-SCRIPTS_DIR=/Users/amirfarhat/workplace/research/californium/deter/scripts
+# Require that CF_HOME is set
+if [[ -z "$CF_HOME" ]]; then
+  echo "CF_HOME is empty or unset"  
+  exit 1
+fi
+
+SCRIPTS_DIR=$CF_HOME/deter/scripts
 cd $SCRIPTS_DIR
 
 exp_dir=$1
