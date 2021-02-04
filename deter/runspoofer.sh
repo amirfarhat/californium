@@ -1,12 +1,8 @@
-proxy_ip=$1
+proxy_ip=127.0.0.1
 
-origin_ip=$2
+origin_ip=127.0.0.1
 
-my_ip=$3
-if [ -z $my_ip ]
-then
-	my_ip=`hostname -I | awk '{ printf $1 }'`
-fi
+my_ip=127.0.0.1
 
 me=`basename "$0"`
 coap_port=5683
@@ -23,4 +19,4 @@ sudo python3 coapspoofer.py \
   --uri-host $proxy_ip \
   --uri-path coap2http \
   --proxy-uri http://$origin_ip:80 \
-  --num-messages 10
+  --num-messages $1
