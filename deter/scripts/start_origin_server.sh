@@ -19,11 +19,14 @@ function log () {
 mkdir -p $TMP_DATA
 
 if [[ $TCPDUMP -eq 1 ]]; then
-  log "Running origin_server_tcpdump...\n"
+  log "Running origin_server tcpdump...\n"
   screen -d -m sudo $BIN_HOME/run_tcpdump.sh origin_server
-  #sudo $BIN_HOME/run_tcpdump.sh origin_server
+fi
+
+if [[ $DO_PERF -eq 1 ]]; then
+  log "Running origin_server perf...\n"
+  screen -d -m sudo $BIN_HOME/run_perf.sh origin_server
 fi
 
 log "Running origin_server...\n"
 screen -d -m sudo $BIN_HOME/origin_server_run.sh
-#sudo $BIN_HOME/origin_server_run.sh

@@ -26,6 +26,10 @@ ORIGIN_SERVER_APACHE=1
 PROXY_TOP=1
 TOP_INTERVAL=1
 
+# Perf
+DO_PERF=1
+PERF_FREQUENCY=99
+
 # Logging
 DO_PROXY_LOGGING=1
 
@@ -34,6 +38,7 @@ TMP_DATA=/tmp/data
 
 ATTACKER_NAME="attacker.coap-setup.MIT-DoS.isi.deterlab.net"
 ATTACKER_TCPDUMP="attacker_dump.pcap"
+ATTACKER_PERF="attacker_perf.data"
 ATTACKER_LOGNAME="attacker.log"
 ATTACKER_IP="10.1.1.2"
 ATTACKER_SPOOFED_IP="8.8.8.8"
@@ -42,6 +47,7 @@ ATTACKER_DURATION=20
 
 ORIGIN_SERVER_NAME="originserver.coap-setup.MIT-DoS.isi.deterlab.net"
 ORIGIN_SERVER_TCPDUMP="server_dump.pcap"
+ORIGIN_SERVER_PERF="server_perf.data"
 ORIGIN_SERVER_LOGNAME="server.log"
 ORIGIN_SERVER_IP="10.1.2.3"
 ORIGIN_SERVER_PORT=80
@@ -49,6 +55,7 @@ ORIGIN_SERVER_DURATION=120
 
 PROXY_NAME="proxy.coap-setup.MIT-DoS.isi.deterlab.net"
 PROXY_TCPDUMP="proxy_dump.pcap"
+PROXY_PERF="proxy_perf.data"
 PROXY_LOGNAME="proxy.log"
 PROXY_TOPNAME="proxy.top"
 PROXY_IP="10.1.1.3"
