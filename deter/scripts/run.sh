@@ -87,6 +87,10 @@ for ((i=1; i<=$_N; i++)); do
   done
   log "OK\n"
 
+  log "[SETUP] Sleeping for a bit...\n"
+  sleep 5
+  log "OK\n"
+
   # Move data files from tmp into the corresponding data run directory
   for host_name in ${HOST_NAMES[@]}; do
     log "[CHECKPOINT] Moving data from $host_name to $run_data_dir...\n"
