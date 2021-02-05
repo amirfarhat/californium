@@ -8,19 +8,19 @@ if [ $node_type = "proxy" ]; then
   sleep_amt=$PROXY_DURATION
   rm -f $TMP_DATA/$PROXY_TCPDUMP
   touch $TMP_DATA/$PROXY_TCPDUMP
-  eval "tcpdump -i -n any port '($ORIGIN_SERVER_PORT or $PROXY_COAP_PORT)' -B $TCPDUMP_BUFFER_KIBS -w $TMP_DATA/$PROXY_TCPDUMP &"
+  eval "tcpdump -n -i any port '($ORIGIN_SERVER_PORT or $PROXY_COAP_PORT)' -B $TCPDUMP_BUFFER_KIBS -w $TMP_DATA/$PROXY_TCPDUMP &"
 
 elif [ $node_type = "attacker" ]; then
   sleep_amt=$PROXY_DURATION
   rm -f $TMP_DATA/$ATTACKER_TCPDUMP
   touch $TMP_DATA/$ATTACKER_TCPDUMP
-  tcpdump -i -n any udp port $PROXY_COAP_PORT -B $TCPDUMP_BUFFER_KIBS -w $TMP_DATA/$ATTACKER_TCPDUMP &
+  tcpdump -n -i any udp port $PROXY_COAP_PORT -B $TCPDUMP_BUFFER_KIBS -w $TMP_DATA/$ATTACKER_TCPDUMP &
 
 elif [ $node_type = "origin_server" ]; then
   sleep_amt=$ORIGIN_SERVER_DURATION
   rm -f $TMP_DATA/$ORIGIN_SERVER_TCPDUMP
   touch $TMP_DATA/$ORIGIN_SERVER_TCPDUMP
-  tcpdump -i -n any port $ORIGIN_SERVER_PORT -B $TCPDUMP_BUFFER_KIBS -w $TMP_DATA/$ORIGIN_SERVER_TCPDUMP &
+  tcpdump -n -i any port $ORIGIN_SERVER_PORT -B $TCPDUMP_BUFFER_KIBS -w $TMP_DATA/$ORIGIN_SERVER_TCPDUMP &
 
 else
   echo "Unknown parameter"
