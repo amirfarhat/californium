@@ -99,7 +99,7 @@ done
 log "[SETUP] Zipping data files...\n"
 cd $experiment_dir
 cd ..
-sudo zip -r $_EXP_NAME.zip $_EXP_NAME
+zip -r $_EXP_NAME.zip $_EXP_NAME
 log "OK\n"
 
 log "[CHECKPOINT] Finished experiment!\n"

@@ -68,11 +68,3 @@ done
 for pid in "${pids[@]}"; do
   wait $pid
 done
-
-# # Execute analysis of all trials
-# for D in $exp_dir/*/; do
-#   if [[ -d $D ]]; then
-#     echo "Trial $D"
-#     python3 $SCRIPTS_DIR/plot_tcpdump.py -g -a $D/processed_attacker_dump.out -p $D/processed_proxy_dump.out -l $D/proxy.log
-#   fi
-# done
