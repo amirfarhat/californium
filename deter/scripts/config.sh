@@ -29,9 +29,6 @@ TOP_INTERVAL=1
 # Logging
 DO_PROXY_LOGGING=1
 
-# Sysctl
-NETDEV_MAX_BACKLOG=500000
-
 TMP=/tmp
 TMP_DATA=/tmp/data
 

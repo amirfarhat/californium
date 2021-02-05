@@ -19,9 +19,6 @@ sudo apt install -y default-jdk default-jre
 # Set small index.html as Apache homepage
 sudo cp $DETER_HOME/utils/index.html /var/www/html/index.html
 
-# # Increase the maximum length of processor input queues
-# sudo sysctl -w net.core.netdev_max_backlog=$NETDEV_MAX_BACKLOG
-
 # Set custom bashrc
 sudo cp $DETER_HOME/utils/.bashrc ~/.bashrc
 source ~/.bashrc
