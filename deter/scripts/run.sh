@@ -97,7 +97,9 @@ done
 
 # Zip experiment directory for super fast network transfer
 log "[SETUP] Zipping data files...\n"
-zip -r $experiment_dir.zip $experiment_dir
+cd $experiment_dir
+cd ..
+sudo zip -r $_EXP_NAME.zip $_EXP_NAME
 log "OK\n"
 
 log "[CHECKPOINT] Finished experiment!\n"
