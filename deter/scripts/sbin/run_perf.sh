@@ -19,3 +19,5 @@ else
 fi
 
 sudo timeout $PROXY_DURATION perf record -F $PERF_FREQUENCY -a -g -o $TMP_DATA/$PERF_NAME
+
+sudo chmod 666 $TMP_DATA/$PERF_NAME

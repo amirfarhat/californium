@@ -17,7 +17,6 @@ function log () {
 }
 
 sudo mkdir -p $TMP_DATA
-sudo chmod 777 $TMP_DATA
 
 if [[ $TCPDUMP -eq 1 ]]; then
   log "Running attacker_tcpdump...\n"
