@@ -28,10 +28,5 @@ if [[ $PROXY_TOP -eq 1 ]]; then
   screen -d -m sudo $BIN_HOME/top.sh
 fi
 
-if [[ $DO_PERF -eq 1 ]]; then
-  log "Running proxy perf...\n"
-  screen -d -m sudo $BIN_HOME/run_perf.sh proxy
-fi
-
 log "Running proxy...\n"
 screen -d -m sudo $BIN_HOME/proxy_run.sh

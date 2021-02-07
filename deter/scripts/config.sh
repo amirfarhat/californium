@@ -14,6 +14,7 @@ fi
 DETER_HOME=$CF_HOME/deter
 SCRIPTS_HOME=$DETER_HOME/scripts
 BIN_HOME=$SCRIPTS_HOME/sbin
+UTILS_HOME=$DETER_HOME/utils
 
 # Tcpdump
 TCPDUMP=1
@@ -25,9 +26,12 @@ ORIGIN_SERVER_APACHE=1
 PROXY_TOP=1
 TOP_INTERVAL=1
 
-# Perf
-DO_PERF=1
-PERF_FREQUENCY=99
+# Java Perf Profiling
+DO_JAVA_PROFILING=1
+FLAMEGRAPH_NAME="flamegraph.svg"
+PROFILER_DIR_NAME="async-profiler-1.8.3-linux-x64"
+PROFILE_BINARY_NAME="$PROFILER_DIR_NAME.tar.gz"
+PROFILE_BINARY_URL="https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/$PROFILE_BINARY_NAME"
 
 # Logging
 DO_PROXY_LOGGING=1
