@@ -20,7 +20,7 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   sudo sysctl -w kernel.kptr_restrict=0
 
   # Include frame pointer for Java profiling
-  jvm_args="-XX:+PreserveFramePointer"
+  jvm_args="-XX:+PreserveFramePointer -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints"
 fi
 
 # Run the proxy
