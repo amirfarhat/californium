@@ -15,11 +15,6 @@ fi
 
 # Set up Java profiling
 if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
-  # Set kernel parameters to enable perf profiling
-  sudo sysctl -w kernel.perf_event_paranoid=1
-  sudo sysctl -w kernel.kptr_restrict=0
-
-  # Include frame pointer for Java profiling
   jvm_args="-XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints"
 fi
 

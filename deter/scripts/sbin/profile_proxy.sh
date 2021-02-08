@@ -3,8 +3,12 @@
 source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
 # Get PID of the already running proxy
+while [[ `pidof java` == "" ]]; do
+  echo "Waiting for java process"
+  sleep 0.5
+done
 proxy_pid=`pidof java`
-echo "PROFILING PROXY PID $proxy_pid"
+echo "Found java process. Using pid $proxy_pid"
 
 # Set kernel parameters to enable perf profiling
 sudo sysctl -w kernel.perf_event_paranoid=1
