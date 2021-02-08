@@ -15,11 +15,11 @@ zipped_experiment_name=$1
 
 # | Step 0 | Unzip experiment files
 cd $DATA_DIR
-unzip -o $zipped_experiment_name
+unzip -n $zipped_experiment_name
 
 # Construct full path to experiment by stripping zip suffix
 _zipped_path="$DATA_DIR/$zipped_experiment_name"
-exp_dir="${_zipped_path%ZIP_SUFFIX}"
+exp_dir="${_zipped_path%$ZIP_SUFFIX}"
 
 # | Step 1 | Create (if not exists) processed CoAP tcpdumps
 cd $SCRIPTS_DIR
