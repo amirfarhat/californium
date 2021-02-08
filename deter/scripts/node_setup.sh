@@ -14,7 +14,7 @@ if [[ ! -d $UTILS_HOME/$PROFILER_DIR_NAME  ]]; then
   cd $UTILS_HOME
   wget $PROFILE_BINARY_URL
   tar xzvf $PROFILE_BINARY_NAME
-else
+fi
 
 # Install utilities
 sudo apt install -y iperf traceroute moreutils apache2 httpie linux-tools-generic linux-cloud-tools-generic linux-tools-4.15.0-112-generic linux-cloud-tools-4.15.0-112-generic openjdk-11-dbg
