@@ -67,8 +67,8 @@ for ((i=1; i<=$_N; i++)); do
   ssh $RUN_USER@$PROXY_NAME "sudo $SCRIPTS_HOME/start_proxy.sh -v"
   log "OK\n"
 
-  log "[SETUP] Sleeping for a bit...\n"
-  sleep 5
+  log "[SETUP] Pausing for $PAUSE_TIME seconds...\n"
+  sleep $PAUSE_TIME
   log "OK\n"
 
   # Attacker
@@ -87,8 +87,8 @@ for ((i=1; i<=$_N; i++)); do
   done
   log "OK\n"
 
-  log "[SETUP] Sleeping for a bit...\n"
-  sleep 5
+  log "[SETUP] Pausing for $PAUSE_TIME seconds...\n"
+  sleep $PAUSE_TIME
   log "OK\n"
 
   # Move data files from tmp into the corresponding data run directory
