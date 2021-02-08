@@ -28,15 +28,6 @@ fi
 
 proxy_pid=`pidof java`
 
-# Do Java profiling
-if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
-  # Create and prepare the flamegraph svg
-  sudo touch $TMP_DATA/$FLAMEGRAPH_NAME
-  sudo chmod 666 $TMP_DATA/$FLAMEGRAPH_NAME
-
-  (bash $UTILS_HOME/$PROFILER_DIR_NAME/profiler.sh -d $PROXY_DURATION -f $TMP_DATA/$FLAMEGRAPH_NAME $proxy_pid) &
-fi
-
 sleep $PROXY_DURATION
 
 kill $proxy_pid
