@@ -17,7 +17,7 @@ BIN_HOME=$SCRIPTS_HOME/sbin
 UTILS_HOME=$DETER_HOME/utils
 
 # Pause time between stages
-PAUSE_TIME=15
+PAUSE_TIME=5
 
 # Tcpdump
 TCPDUMP=1
