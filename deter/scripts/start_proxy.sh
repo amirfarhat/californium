@@ -30,9 +30,3 @@ fi
 
 log "Running proxy...\n"
 screen -d -m sudo $BIN_HOME/proxy_run.sh
-
-# Do Java profiling
-if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
-  log "Running proxy profiling ...\n"
-  screen -d -m sudo $BIN_HOME/profile_proxy.sh
-fi
