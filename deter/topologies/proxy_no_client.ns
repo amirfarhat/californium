@@ -22,5 +22,7 @@ tb-set-node-startcmd $originserver "bash /proj/MIT-DoS/exp/coap-setup/deps/calif
 $ns duplex-link $attacker $proxy     10Mbps 0ms DropTail
 $ns duplex-link $proxy $originserver 1000Mbps 0ms DropTail
 
+tb-use-endnodeshaping 1
+
 $ns rtproto Static
 $ns run
