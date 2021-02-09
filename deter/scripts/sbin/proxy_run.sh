@@ -29,9 +29,10 @@ fi
 # Run the proxy
 ((sudo java $agentpath $jvm_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_args) > $TMP_DATA/$PROXY_LOGNAME) &
 
-proxy_pid=`pidof java`
+proxy_pid=`pgrep java`
 echo "RAN PROXY PID $proxy_pid"
 
 sleep $PROXY_DURATION
 
-kill $proxy_pid
+sudo kill -9 $proxy_pid
+sudo kill -9 $proxy_pid
