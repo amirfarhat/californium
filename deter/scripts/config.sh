@@ -18,6 +18,7 @@ UTILS_HOME=$DETER_HOME/utils
 
 # Pause time between stages
 PAUSE_TIME=5
+WAIT_TIME=20
 
 # Tcpdump
 TCPDUMP=1

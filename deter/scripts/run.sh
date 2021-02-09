@@ -87,8 +87,8 @@ for ((i=1; i<=$_N; i++)); do
   done
   log "OK\n"
 
-  log "[SETUP] Pausing for $PAUSE_TIME seconds...\n"
-  sleep $PAUSE_TIME
+  log "[SETUP] Waiting for $WAIT_TIME seconds...\n"
+  sleep $WAIT_TIME
   log "OK\n"
 
   # Move data files from tmp into the corresponding data run directory
