@@ -34,5 +34,6 @@ echo "RAN PROXY PID $proxy_pid"
 
 sleep $PROXY_DURATION
 
-sudo kill -9 $proxy_pid
+sudo kill $proxy_pid
+sleep 2
 sudo kill -9 $proxy_pid
