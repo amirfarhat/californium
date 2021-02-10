@@ -33,7 +33,7 @@ echo "Sleeping for $PROXY_DURATION seconds..."
 sleep $PROXY_DURATION
 echo "Woke up"
 
-if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
+if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   # Create and prepare the flamegraph svg
   sudo touch $TMP_DATA/$FLAMEGRAPH_NAME
   sudo chmod 666 $TMP_DATA/$FLAMEGRAPH_NAME
