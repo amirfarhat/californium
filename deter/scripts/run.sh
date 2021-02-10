@@ -57,6 +57,11 @@ for ((i=1; i<=$_N; i++)); do
     log "OK\n"
   done
 
+  # Receiver
+  log "[LAUNCH] Starting receiver...\n"
+  ssh $RUN_USER@$RECEIVER_NAME "sudo $SCRIPTS_HOME/start_receiver.sh -v"
+  log "OK\n"
+  
   # Origin server
   log "[LAUNCH] Starting origin server...\n"
   ssh $RUN_USER@$ORIGIN_SERVER_NAME "sudo $SCRIPTS_HOME/start_origin_server.sh -v"

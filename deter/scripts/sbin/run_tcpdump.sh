@@ -22,6 +22,12 @@ elif [ $node_type = "origin_server" ]; then
   touch $TMP_DATA/$ORIGIN_SERVER_TCPDUMP
   tcpdump -n -i any port $ORIGIN_SERVER_PORT -w $TMP_DATA/$ORIGIN_SERVER_TCPDUMP &
 
+elif [ $node_type = "receiver" ]; then
+  sleep_amt=$RECEIVER_DURATION
+  rm -f $TMP_DATA/$RECEIVER_TCPDUMP
+  touch $TMP_DATA/$RECEIVER_TCPDUMP
+  tcpdump -n -i any udp port $RECEIVER_COAP_PORT -w $TMP_DATA/$RECEIVER_TCPDUMP &
+
 else
   echo "Unknown parameter"
   exit 1
@@ -31,4 +37,4 @@ tcpdump_pid=$!
 
 sleep $sleep_amt
 
-kill $tcpdump_pid
+sudo kill $tcpdump_pid
