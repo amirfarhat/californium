@@ -24,10 +24,14 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
 fi
 
 # Run the proxy with stderr and stdout redirected to proxy log
+echo "Running proxy..."
 ((sudo java $agent $jvm_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_args) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
 proxy_pid=`pgrep java`
+echo "Ran proxy with pid $proxy_pid..."
 
+echo "Sleeping for $PROXY_DURATION seconds..."
 sleep $PROXY_DURATION
+echo "Woke up"
 
 if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   # Create and prepare the flamegraph svg
@@ -36,7 +40,11 @@ if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
 
   # Stop profiling and dump output
   cd $UTILS_HOME/$PROFILER_DIR_NAME
+  echo "Stopping profiling..."
   sudo ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1600 $proxy_pid
+  echo "Done"
 fi
 
+echo "Killing $proxy_pid..."
 sudo kill -9 $proxy_pid
+echo "Done"
