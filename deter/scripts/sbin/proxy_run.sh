@@ -2,6 +2,14 @@
 
 source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
+# Make sure there are no java procs running
+while [[ ! -z `pgrep java` ]]; do
+  next_pid=`pgrep java | tail -1`
+  echo "Killing $next_pid..."
+  sudo kill -9 $next_pid
+  echo "Done"
+done
+
 rm -f $TMP_DATA/$PROXY_LOGNAME
 rm -f $TMP_DATA/$FLAMEGRAPH_NAME
 touch $TMP_DATA/$PROXY_LOGNAME
@@ -45,6 +53,15 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   echo "Done"
 fi
 
+# Kill proxy
 echo "Killing $proxy_pid..."
 sudo kill -9 $proxy_pid
 echo "Done"
+
+# Kill all other java procs
+while [[ ! -z `pgrep java` ]]; do
+  next_pid=`pgrep java | tail -1`
+  echo "Killing $next_pid..."
+  sudo kill -9 $next_pid
+  echo "Done"
+done
