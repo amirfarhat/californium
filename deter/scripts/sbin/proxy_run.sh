@@ -19,21 +19,24 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   sudo sysctl -w kernel.perf_event_paranoid=1
   sudo sysctl -w kernel.kptr_restrict=0
 
+  # Specify agent for CPU profiling 
+  agent="-agentpath:$UTILS_HOME/$PROFILER_DIR_NAME/build/libasyncProfiler.so=start,event=cpu"
+fi
+
+# Run the proxy with stderr and stdout redirected to proxy log
+((sudo java $agent $jvm_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_args) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
+proxy_pid=`pgrep java`
+
+sleep $PROXY_DURATION
+
+if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   # Create and prepare the flamegraph svg
   sudo touch $TMP_DATA/$FLAMEGRAPH_NAME
   sudo chmod 666 $TMP_DATA/$FLAMEGRAPH_NAME
 
-  agentpath="-agentpath:$UTILS_HOME/$PROFILER_DIR_NAME/build/libasyncProfiler.so=start,file=$TMP_DATA/$FLAMEGRAPH_NAME"
+  # Stop profiling and dump output
+  cd $UTILS_HOME/$PROFILER_DIR_NAME
+  sudo ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1600 $proxy_pid
 fi
 
-# Run the proxy
-((sudo java $agentpath $jvm_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_args) > $TMP_DATA/$PROXY_LOGNAME) &
-
-proxy_pid=`pgrep java`
-echo "RAN PROXY PID $proxy_pid"
-
-sleep $PROXY_DURATION
-
-sudo kill $proxy_pid
-sleep 2
 sudo kill -9 $proxy_pid

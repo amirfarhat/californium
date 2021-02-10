@@ -92,8 +92,14 @@ for ((i=1; i<=$_N; i++)); do
   done
   log "OK\n"
 
-  log "[SETUP] Waiting for $WAIT_TIME seconds...\n"
-  sleep $WAIT_TIME
+  sleep_amt=$(( $WAIT_TIME ))
+  log "[SETUP] Waiting for $sleep_amt seconds...\n"
+  secs=$sleep_amt
+  while [ $secs -gt 0 ]; do
+    echo -ne "$secs\033[0K\r"
+    sleep 1
+    : $((secs--))
+  done
   log "OK\n"
 
   # Move data files from tmp into the corresponding data run directory
