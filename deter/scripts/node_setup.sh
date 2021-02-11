@@ -2,6 +2,9 @@
 
 source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
+# Fix weird bug where we can't apt install
+sudo dpkg --configure -a
+
 # Expect:
 # Forked californium from source: https://github.com/amirfarhat/californium
 if [[ ! -d $CF_HOME ]]; then
