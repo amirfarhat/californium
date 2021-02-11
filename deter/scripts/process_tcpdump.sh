@@ -13,7 +13,6 @@ if [[ $node_type == "receiver" ]]; then
 else
   filter="coap && coap.type == 0"
 fi
-echo $filter
 
 # Run wireshark CLI to get CoAP message summary
 tshark \
