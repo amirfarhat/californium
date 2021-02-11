@@ -8,7 +8,7 @@ def parse_args():
   parser = argparse.ArgumentParser(description = '')
 
   parser.add_argument('-t', '--data-type', dest='data_type',
-                      help='', action='store', type=str.lower, choices=["attacker_dump", "proxy_dump", "receiver_dump" "proxy_log"])
+                      help='', action='store', type=str.lower, choices=["attacker_dump", "proxy_dump", "receiver_dump", "proxy_log"])
 
   parser.add_argument('-i', '--infile', dest='infile',
                       help='', action='store', type=str)
