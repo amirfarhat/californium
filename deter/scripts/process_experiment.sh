@@ -38,21 +38,21 @@ for D in $exp_dir/*/; do
     # Process attacker dump
     if [[ ! -f $D/processed_attacker_dump.out ]]; then
       if [[ -f $D/attacker_dump.pcap ]]; then
-        (./process_tcpdump.sh $D/attacker_dump.pcap $D/processed_attacker_dump.out) &
+        (./process_tcpdump.sh $D/attacker_dump.pcap $D/processed_attacker_dump.out "attacker") &
         pids+=($!)
       fi
     fi
     # Process proxy dump
     if [[ ! -f $D/processed_proxy_dump.out ]]; then
       if [[ -f $D/proxy_dump.pcap ]]; then
-        (./process_tcpdump.sh $D/proxy_dump.pcap $D/processed_proxy_dump.out) &
+        (./process_tcpdump.sh $D/proxy_dump.pcap $D/processed_proxy_dump.out "proxy") &
         pids+=($!)
       fi
     fi
     # Process receiver dump
     if [[ ! -f $D/processed_receiver_dump.out ]]; then
       if [[ -f $D/receiver_dump.pcap ]]; then
-        (./process_tcpdump.sh $D/receiver_dump.pcap $D/processed_receiver_dump.out) &
+        (./process_tcpdump.sh $D/receiver_dump.pcap $D/processed_receiver_dump.out "receiver") &
         pids+=($!)
       fi
     fi

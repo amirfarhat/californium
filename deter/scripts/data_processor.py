@@ -19,10 +19,6 @@ def parse_args():
 
 args = parse_args()
 
-TSHARK_MID_IDX = 8
-TSHARK_TKN_IDX = 10
-TSHARK_TIME_IDX = 1
-
 ALLOWED_EVENTS={
   "coap_received",
   "coap_translated",
@@ -45,26 +41,50 @@ class ProxyLogValueException(Exception): pass
 # ====================================================================
 # ====================================================================
 
-def parse_from_tshark_line(message_string):
+def parse_from_tshark_line(message_string, is_receiver=False):
   """
   >>> parse_from_tshark_line("34 1612380142.546438      8.8.8.8 → 10.1.1.3     CoAP 92 CON, MID:4314, GET, TKN:23 5c 2f b7, coap://10.1.1.3/coap2http")
-  ('1612380142.546438', '4314', '235c2fb7')
+  ('1612380142.546438', '4314', '235c2fb7', 'GET')
   
   >>> parse_from_tshark_line("437298 1612380162.414260      8.8.8.8 → 10.1.1.3     CoAP 92 CON, MID:50693, GET, TKN:cf fe a6 6c, coap://10.1.1.3/coap2http")
-  ('1612380162.414260', '50693', 'cffea66c')
+  ('1612380162.414260', '50693', 'cffea66c', 'GET')
+  
+  >>> parse_from_tshark_line("31434 1612992383.976399     10.1.1.2 → 10.1.1.3     CoAP 183 ACK, MID:59721, 2.05 Content, TKN:be e3 9e 2e", is_receiver=True)
+  ('1612992383.976399', '59721', 'bee39e2e', '2.05')
+  
+  >>> parse_from_tshark_line("31435 1612992383.995075     10.1.1.2 → 10.1.1.3     CoAP 62 ACK, MID:59785, 5.02 Bad Gateway, TKN:04 4d eb 22", is_receiver=True)
+  ('1612992383.995075', '59785', '044deb22', '5.02')
   """
-  # Format: 1 1612380142.546085      8.8.8.8 → 10.1.1.3     CoAP 92 CON, MID:4281, GET, TKN:f4 22 27 39, coap://10.1.1.3/coap2http
+  # Normal Format: 1 1612380142.546085      8.8.8.8 → 10.1.1.3     CoAP 92 CON, MID:4281, GET, TKN:f4 22 27 39, coap://10.1.1.3/coap2http
+  # Recv   Format: 31435 1612992383.995075     10.1.1.2 → 10.1.1.3     CoAP 62 ACK, MID:59785, 5.02 Bad Gateway, TKN:04 4d eb 22
   parts = message_string.split()
+
+  # Set parsing parameters
+  TSHARK_MID_IDX = 8
+  TSHARK_CODE_IDX = 9
+  TSHARK_TKN_IDX = 10
+  TSHARK_TIME_IDX = 1
+  if is_receiver:
+    TSHARK_TKN_IDX += 1
 
   # Parse time
   message_timestamp = parts[TSHARK_TIME_IDX]
   if float(message_timestamp) <= 0:
     raise ValueError(f"Expected positive timestamp, got {message_timestamp}")
-  
+
   # Parse message ID
   if not parts[TSHARK_MID_IDX].startswith('MID:'):
     raise ValueError(parts[TSHARK_MID_IDX])
   message_id = parts[TSHARK_MID_IDX][4:-1] # Skip prefix and last comma
+
+  # Parse code
+  if parts[TSHARK_CODE_IDX].endswith(','):
+    message_code = parts[TSHARK_CODE_IDX][:-1] # Skip comma
+  else:
+    message_code = parts[TSHARK_CODE_IDX]
+    if message_code == "5.02":
+      # "Bad Gateway" pushes the token to the right
+      TSHARK_TKN_IDX += 1
 
   # Find token start
   if not parts[TSHARK_TKN_IDX].startswith('TKN:'):
@@ -78,7 +98,7 @@ def parse_from_tshark_line(message_string):
       break
     message_token += parts[i].strip(',')
 
-  return message_timestamp, message_id, message_token
+  return message_timestamp, message_id, message_token, message_code
 
 def parse_from_proxy_log(log_line):
   """
@@ -127,7 +147,7 @@ def parse_from_proxy_log(log_line):
 # ====================================================================
 # ====================================================================
 
-def ingest_tcpdump(infile, outfile):
+def ingest_tcpdump(infile, outfile, is_receiver=False):
   with open(outfile, 'w') as outf:
     # Write fields of the header
     fieldnames = ['message_timestamp', 'message_id', 'message_token', 'event']
@@ -138,13 +158,13 @@ def ingest_tcpdump(infile, outfile):
       for L in inf:
         try: 
           # Parse fields from input file
-          mtimestamp, mid, mtoken = parse_from_tshark_line(L)
+          mtimestamp, mid, mtoken, mcode = parse_from_tshark_line(L, is_receiver)
           
           # Write fields to output file
           writer.writerow({'message_timestamp': mtimestamp,
                             'message_id': mid,
                             'message_token': mtoken,
-                            'event': ''})
+                            'event': mcode})
         except ProxyLogLineDebugFormatException:
           # Prefix of log with Java start output --> can skip
           continue
@@ -176,6 +196,7 @@ if __name__ == "__main__":
   doctest.testmod()
 
   if args.data_type.endswith("_dump"):
-    ingest_tcpdump(args.infile, args.outfile)
+    is_receiver = "receiver" in args.data_type
+    ingest_tcpdump(args.infile, args.outfile, is_receiver)
   else:
     ingest_proxy_log(args.infile, args.outfile)
