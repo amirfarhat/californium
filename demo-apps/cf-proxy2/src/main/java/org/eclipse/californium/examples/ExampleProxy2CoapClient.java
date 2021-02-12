@@ -18,10 +18,7 @@ package org.eclipse.californium.examples;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
-
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
@@ -62,121 +59,44 @@ import org.eclipse.californium.proxy2.resources.ProxyHttpClientResource;
  */
 public class ExampleProxy2CoapClient {
 
-	private static void request(CoapClient client, Request request) {
-		long start = System.currentTimeMillis();
+	private static final int PROXY_PORT = 5683;
+
+	private static String request(CoapClient client, Request request) {
 		try {
 			CoapResponse response = client.advanced(request);
-			if (response != null) {
-				int format = response.getOptions().getContentFormat();
-				if (format != MediaTypeRegistry.TEXT_PLAIN && format != MediaTypeRegistry.UNDEFINED) {
-					System.out.print(MediaTypeRegistry.toString(format));
-				}
-				String text = response.getResponseText();
-				if (text.isEmpty()) {
-					System.out.println(response.getCode() + "/" + response.getCode().name());
-				} else {
-					System.out.println(response.getCode() + "/" + response.getCode().name() + " --- "
-							+ response.getResponseText());
-				}
-			}
+			String midTok = response.advanced().getMID() + "_" + response.advanced().getTokenString();
+			return midTok;
 		} catch (ConnectorException | IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		long finish = System.currentTimeMillis();
-		System.out.println(finish - start);
 	}
 
-	public static void main(String[] args) {
-
-		String inpHttpDestination = null;
-		String inpProxyUri = null;
-		int inpNumReqs = 1;
-		if (args.length != 3) {
-			System.out.println("Usage [httpDestination str] [proxyUri str] [numReqs int]");
+	public static void main(String[] args) throws InterruptedException {
+		if (args.length != 2) {
+			System.out.println("Args [proxy url] [dest url]");
 			System.exit(1);
-		} else {
-			inpHttpDestination = args[0];
-			inpProxyUri = args[1];
-			inpNumReqs = Math.max(1, Integer.parseInt(args[2]));
 		}
+		String proxyUri = args[0];
+		String destinationUri = args[1];
 
-		final String httpDestination = inpHttpDestination;
-		final String proxyUri = inpProxyUri;
-		final int numReqs = inpNumReqs;
+		CoapClient client = new CoapClient();
+		client.useCONs();
 
-		final CoapClient client = new CoapClient();
+		String midTok;
 		Request request;
-
-		int nThread = 60;
-		ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(nThread));
-		for (int i = 0; i < numReqs; i++) {
-			final int ii = i;
-			executorService.submit(new Runnable(){
-				@Override
-				public void run() {
-					Request request = Request.newGet();
-					request.setURI(proxyUri + "/coap2http");
-					request.getOptions().setProxyUri(httpDestination + "/" + ii);
-					try {
-						client.advanced(request);
-					} catch (ConnectorException|IOException e) {
-						e.printStackTrace();
-					}
-				}
-			});
-			
-			// request(client, request);
-		}
+		long start;
 		
-		// // deprecated proxy request - use CoAP and Proxy URI together
-		// request = Request.newGet();
-		// request.setURI("coap://localhost:" + PROXY_PORT + "/coap2coap");
-		// // set proxy URI in option set to bypass the CoAP/proxy URI exclusion
-		// request.getOptions().setProxyUri("coap://localhost:5685/coap-target");
-		// System.out.println("Proxy-URI: " + request.getOptions().getProxyUri());
-		// request(client, request);
+		for (int i = 0; i < 1000; i++) {
+			request = Request.newGet();
+			request.setURI(proxyUri);
+			request.getOptions().setProxyUri(destinationUri);
 
-		// AddressEndpointContext proxy = new AddressEndpointContext(new InetSocketAddress("localhost", PROXY_PORT));
-		// // RFC7252 proxy request - use CoAP-URI, proxy scheme, and destination to proxy
-		// request = Request.newGet();
-		// request.setDestinationContext(proxy);
-		// request.setURI("coap://localhost:8000/http-target");
-		// request.setProxyScheme("http");
-		// System.out.println("Proxy-Scheme: " + request.getOptions().getProxyScheme() + ": " + request.getURI());
-		// request(client, request);
-
-		// // RFC7252 proxy request - use CoAP-URI, and destination to proxy
-		// request = Request.newGet();
-		// request.setDestinationContext(proxy);
-		// request.setURI("coap://localhost:5685/coap-target");
-		// System.out.println("Proxy: " + request.getURI());
-		// request(client, request);
-
-		// // RFC7252 proxy request - use Proxy-URI, and destination to proxy
-		// request = Request.newGet();
-		// request.setDestinationContext(proxy);
-		// request.setProxyUri("http://user@localhost:8000/http-target");
-		// request.setType(Type.NON);
-		// System.out.println("Proxy-URI: " + request.getOptions().getProxyUri());
-		// request(client, request);
-
-		// // RFC7252 proxy request - use CoAP-URI, and destination to proxy
-		// request = Request.newGet();
-		// request.setDestinationContext(proxy);
-		// request.setURI("coap://localhost:5683/coap-target");
-		// System.out.println("Proxy: " + request.getURI());
-		// request(client, request);
-
-		// // RFC7252 reverse proxy request
-		// request = Request.newGet();
-		// request.setURI("coap://localhost:5683/targets/destination1");
-		// System.out.println("Reverse-Proxy: " + request.getURI());
-		// request(client, request);
-
-		// request = Request.newGet();
-		// request.setURI("coap://localhost:5683/targets/destination2");
-		// System.out.println("Reverse-Proxy: " + request.getURI());
-		// request(client, request);
+			start = System.nanoTime();
+			midTok = request(client, request);
+			System.out.println(midTok + ": " + (System.nanoTime() - start) + " ns");
+			
+			TimeUnit.SECONDS.sleep(1);
+		}
 
 		client.shutdown();
 	}
