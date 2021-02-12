@@ -79,7 +79,7 @@ PROXY_TCPDUMP="proxy_dump.pcap"
 PROXY_PERF="proxy_perf.data"
 PROXY_LOGNAME="proxy.log"
 PROXY_TOPNAME="proxy.top"
-PROXY_IP="10.1.1.3"
+PROXY_IP="10.1.3.2"
 PROXY_COAP_PORT="5683"
 
 # Client
