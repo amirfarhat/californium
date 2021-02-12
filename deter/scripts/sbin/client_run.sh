@@ -2,6 +2,8 @@
 
 source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 
+PROXY_IP=$PROXY_IP_FOR_CLIENT
+
 # Make sure there are no java procs running
 while [[ ! -z `pgrep java` ]]; do
   next_pid=`pgrep java | tail -1`
