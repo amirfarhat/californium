@@ -23,6 +23,9 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
 import org.eclipse.californium.core.coap.CoAP.Type;
+import org.eclipse.californium.core.network.RandomTokenGenerator;
+import org.eclipse.californium.core.network.TokenGenerator.Scope;
+import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.elements.AddressEndpointContext;
@@ -61,11 +64,10 @@ public class ExampleProxy2CoapClient {
 
 	private static final int PROXY_PORT = 5683;
 
-	private static String request(CoapClient client, Request request) {
+	private static CoapResponse request(CoapClient client, Request request) {
 		try {
 			CoapResponse response = client.advanced(request);
-			String midTok = response.advanced().getMID() + "_" + response.advanced().getTokenString();
-			return midTok;
+			return response;
 		} catch (ConnectorException | IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -79,23 +81,28 @@ public class ExampleProxy2CoapClient {
 		String proxyUri = args[0];
 		String destinationUri = args[1];
 
+		RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(NetworkConfig.getStandard());
+
 		CoapClient client = new CoapClient();
 		client.useCONs();
 
-		String midTok;
+		String midTok, suffix;
 		Request request;
+		CoapResponse response;
 		long start;
 		
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 1; i <= 1000; i++) {
 			request = Request.newGet();
 			request.setURI(proxyUri);
 			request.getOptions().setProxyUri(destinationUri);
+			request.setMID(i);
+			request.setToken(tokenGenerator.createToken(Scope.LONG_TERM));
+			midTok = request.getMID() + "_" + request.getTokenString();
 
-			start = System.nanoTime();
-			midTok = request(client, request);
-			System.out.println(midTok + ": " + (System.nanoTime() - start) + " ns");
-			
-			TimeUnit.SECONDS.sleep(1);
+			System.out.println("" + System.currentTimeMillis() + " SEND " + midTok);
+			response = request(client, request);
+			suffix = (response == null) ? "FAILED" : "";
+			System.out.println("" + System.currentTimeMillis() + " RECV " + midTok + " " + suffix);
 		}
 
 		client.shutdown();
