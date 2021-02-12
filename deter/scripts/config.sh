@@ -11,55 +11,60 @@ else
   CF_HOME=~/californium
 fi
 
+# Home directories
 DETER_HOME=$CF_HOME/deter
 SCRIPTS_HOME=$DETER_HOME/scripts
 BIN_HOME=$SCRIPTS_HOME/sbin
 UTILS_HOME=$DETER_HOME/utils
+TMP=/tmp
+TMP_DATA=/tmp/data
 
 RUN_USER="amirf"
 
-# Pause time between stages
-PAUSE_TIME=5
-WAIT_TIME=20
+PAUSE_TIME=5 # Pause time after launching infra
+WAIT_TIME=10 # Wait time after experiment finishes
 
-# Tcpdump
+# Binary toggles
 TCPDUMP=1
-
-# HTTP Server
 ORIGIN_SERVER_APACHE=1
-
-# Top
+DO_PROXY_LOGGING=0
 PROXY_TOP=1
+DO_JAVA_PROFILING=1
+RUN_ATTACKER=0
+RUN_CLIENT=1
+
+# Tunable parameters
 TOP_INTERVAL=1
+PROXY_CONNECTIONS=100
+
+# Tunable durations
+ORIGIN_SERVER_DURATION=150
+ATTACKER_DURATION=$(( $ORIGIN_SERVER_DURATION / 5 ))
+RECEIVER_DURATION=$(( $ORIGIN_SERVER_DURATION + $PAUSE_TIME ))
+PROXY_DURATION=$ORIGIN_SERVER_DURATION
+CLIENT_DURATION=$(( $ORIGIN_SERVER_DURATION - $PAUSE_TIME ))
 
 # Java Perf Profiling
-DO_JAVA_PROFILING=1
 FLAMEGRAPH_NAME="flamegraph.svg"
 PROFILER_DIR_NAME="async-profiler-1.8.3-linux-x64"
 PROFILE_BINARY_NAME="$PROFILER_DIR_NAME.tar.gz"
 PROFILE_BINARY_URL="https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/$PROFILE_BINARY_NAME"
 
-# Proxy
-DO_PROXY_LOGGING=0
-PROXY_CONNECTIONS=100
-
-TMP=/tmp
-TMP_DATA=/tmp/data
-
+# Origin server
 ORIGIN_SERVER_NAME="originserver.coap-setup.MIT-DoS.isi.deterlab.net"
 ORIGIN_SERVER_TCPDUMP="server_dump.pcap"
 ORIGIN_SERVER_PERF="server_perf.data"
 ORIGIN_SERVER_LOGNAME="server.log"
 ORIGIN_SERVER_IP="10.1.3.3"
 ORIGIN_SERVER_PORT=80
-ORIGIN_SERVER_DURATION=120
 
+# Receiver
 RECEIVER_NAME="receiver.coap-setup.MIT-DoS.isi.deterlab.net"
 RECEIVER_TCPDUMP="receiver_dump.pcap"
 RECEIVER_IP="10.1.4.3"
 RECEIVER_COAP_PORT="5683"
-RECEIVER_DURATION=$(( $PAUSE_TIME + $ORIGIN_SERVER_DURATION ))
 
+# Attacker
 ATTACKER_NAME="attacker.coap-setup.MIT-DoS.isi.deterlab.net"
 ATTACKER_TCPDUMP="attacker_dump.pcap"
 ATTACKER_PERF="attacker_perf.data"
@@ -67,8 +72,8 @@ ATTACKER_LOGNAME="attacker.log"
 ATTACKER_IP="10.1.2.2"
 ATTACKER_SPOOFED_IP=$RECEIVER_IP
 ATTACKER_SPOOFED_PORT=$RECEIVER_COAP_PORT
-ATTACKER_DURATION=20
 
+# Proxy
 PROXY_NAME="proxy.coap-setup.MIT-DoS.isi.deterlab.net"
 PROXY_TCPDUMP="proxy_dump.pcap"
 PROXY_PERF="proxy_perf.data"
@@ -76,15 +81,14 @@ PROXY_LOGNAME="proxy.log"
 PROXY_TOPNAME="proxy.top"
 PROXY_IP="10.1.1.3"
 PROXY_COAP_PORT="5683"
-PROXY_DURATION=$ORIGIN_SERVER_DURATION
 
+# Client
 CLIENT_NAME="client.coap-setup.MIT-DoS.isi.deterlab.net"
 CLIENT_TCPDUMP="client_dump.pcap"
-CLIENT_PERF="client_perf.data"
 CLIENT_LOGNAME="client.log"
 CLIENT_IP="10.1.1.2"
-CLIENT_DURATION=$ORIGIN_SERVER_DURATION
 
+# Collection of all hosts
 HOST_NAMES=(
   "$ATTACKER_NAME"
   "$ORIGIN_SERVER_NAME"

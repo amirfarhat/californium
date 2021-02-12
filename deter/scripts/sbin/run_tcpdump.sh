@@ -28,6 +28,12 @@ elif [ $node_type = "receiver" ]; then
   touch $TMP_DATA/$RECEIVER_TCPDUMP
   tcpdump -n -i any udp port $RECEIVER_COAP_PORT -w $TMP_DATA/$RECEIVER_TCPDUMP &
 
+elif [ $node_type = "client" ]; then
+  sleep_amt=$CLIENT_DURATION
+  rm -f $TMP_DATA/$CLIENT_TCPDUMP
+  touch $TMP_DATA/$CLIENT_TCPDUMP
+  tcpdump -n -i any udp -w $TMP_DATA/$CLIENT_TCPDUMP &
+
 else
   echo "Unknown parameter"
   exit 1
