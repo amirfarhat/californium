@@ -41,7 +41,7 @@ PROFILE_BINARY_URL="https://github.com/jvm-profiling-tools/async-profiler/releas
 
 # Proxy
 DO_PROXY_LOGGING=0
-PROXY_CONNECTIONS=50
+PROXY_CONNECTIONS=100
 
 TMP=/tmp
 TMP_DATA=/tmp/data
@@ -56,7 +56,7 @@ ORIGIN_SERVER_DURATION=120
 
 RECEIVER_NAME="receiver.coap-setup.MIT-DoS.isi.deterlab.net"
 RECEIVER_TCPDUMP="receiver_dump.pcap"
-RECEIVER_IP="10.1.1.3"
+RECEIVER_IP="10.1.4.3"
 RECEIVER_COAP_PORT="5683"
 RECEIVER_DURATION=$(( $PAUSE_TIME + $ORIGIN_SERVER_DURATION ))
 
@@ -74,13 +74,21 @@ PROXY_TCPDUMP="proxy_dump.pcap"
 PROXY_PERF="proxy_perf.data"
 PROXY_LOGNAME="proxy.log"
 PROXY_TOPNAME="proxy.top"
-PROXY_IP="10.1.2.3"
+PROXY_IP="10.1.1.3"
 PROXY_COAP_PORT="5683"
 PROXY_DURATION=$ORIGIN_SERVER_DURATION
+
+CLIENT_NAME="client.coap-setup.MIT-DoS.isi.deterlab.net"
+CLIENT_TCPDUMP="client_dump.pcap"
+CLIENT_PERF="client_perf.data"
+CLIENT_LOGNAME="client.log"
+CLIENT_IP="10.1.1.2"
+CLIENT_DURATION=$ORIGIN_SERVER_DURATION
 
 HOST_NAMES=(
   "$ATTACKER_NAME"
   "$ORIGIN_SERVER_NAME"
   "$PROXY_NAME"
   "$RECEIVER_NAME"
+  "$CLIENT_NAME"
 )
