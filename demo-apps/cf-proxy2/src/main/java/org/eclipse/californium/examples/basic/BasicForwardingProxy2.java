@@ -85,7 +85,7 @@ public class BasicForwardingProxy2 {
 
 	private CoapServer coapProxyServer;
 
-	public BasicForwardingProxy2(NetworkConfig config, boolean doDataLogging) throws IOException {
+	public BasicForwardingProxy2(NetworkConfig config, boolean doDataLogging, int numConnections) throws IOException {
 		// initialize http clients
 		HttpClientFactory.setNetworkConfig(config);
 
@@ -96,6 +96,7 @@ public class BasicForwardingProxy2 {
 		// initialize proxy resource
 		ProxyHttpClientResource coap2http = new ProxyHttpClientResource(COAP2HTTP, false, false, null);
 		coap2http.setDataLogging(doDataLogging);
+		coap2http.installHttpClient(numConnections);
 
 		// initialize proxy message deviverer
 		ForwardProxyMessageDeliverer proxyMessageDeliverer = new ForwardProxyMessageDeliverer(coap2http);
@@ -108,9 +109,15 @@ public class BasicForwardingProxy2 {
 	}
 
 	public static void main(String args[]) throws IOException {
-		final boolean doDataLogging = (args.length > 0);
+		if (args.length != 2) {
+			System.out.println("Need two args [log: string] [connections: int]");
+			System.exit(1);
+		} 
+		final boolean doDataLogging = (args[0].equals("log"));
+		final int numConnections = Integer.parseInt(args[1]);
+
 		NetworkConfig proxyConfig = NetworkConfig.createWithFile(CONFIG_FILE, CONFIG_HEADER, DEFAULTS);
-		BasicForwardingProxy2 proxy = new BasicForwardingProxy2(proxyConfig, doDataLogging);
+		BasicForwardingProxy2 proxy = new BasicForwardingProxy2(proxyConfig, doDataLogging, numConnections);
 		System.out.println(BasicForwardingProxy2.class.getSimpleName() + " started.");
 	}
 }

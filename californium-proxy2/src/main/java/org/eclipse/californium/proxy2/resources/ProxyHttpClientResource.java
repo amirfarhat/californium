@@ -73,7 +73,7 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 	 * DefaultHttpClient is thread safe. It is recommended that the same
 	 * instance of this class is reused for multiple request executions.
 	 */
-	private static final CloseableHttpAsyncClient asyncClient = HttpClientFactory.createClient();
+	private CloseableHttpAsyncClient asyncClient = null;
 
 	/**
 	 * Create proxy resource for outgoing http-requests.
@@ -228,5 +228,9 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 
 	public void setDataLogging(boolean doDataLogging) {
 		this.doDataLogging = doDataLogging;
+	}
+
+	public void installHttpClient(int numConnections) {
+		this.asyncClient = HttpClientFactory.customCreateClient(numConnections);
 	}
 }

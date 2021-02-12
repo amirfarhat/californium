@@ -26,6 +26,7 @@ import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.conn.PoolingNHttpClientConnectionManager;
 import org.apache.http.impl.nio.reactor.DefaultConnectingIOReactor;
+import org.apache.http.nio.conn.NHttpClientConnectionManager;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.protocol.*;
@@ -57,6 +58,10 @@ public class HttpClientFactory {
 			config = HttpClientFactory.config.get();
 		}
 		return config;
+	}
+
+	public static CloseableHttpAsyncClient customCreateClient(int numConnections) {
+		return customCreateClient(getNetworkConfig(), numConnections);
 	}
 
 	public static CloseableHttpAsyncClient createClient() {
@@ -95,6 +100,42 @@ public class HttpClientFactory {
 		}
 	}
 
+	public static CloseableHttpAsyncClient customCreateClient(NetworkConfig config, int numConnections) {
+		try {
+			PoolingNHttpClientConnectionManager cm = createPoolingConnManager();
+			cm.setMaxTotal(numConnections);
+			cm.setDefaultMaxPerRoute(numConnections);
+
+			final CloseableHttpAsyncClient client = HttpAsyncClientBuilder.create().disableCookieManagement()
+					.setDefaultRequestConfig(createCustomRequestConfig(config))
+					.setConnectionManager(cm).addInterceptorFirst(new RequestAcceptEncoding())
+					.addInterceptorFirst(new RequestConnControl())
+					// .addInterceptorFirst(new RequestContent())
+					.addInterceptorFirst(new RequestDate()).addInterceptorFirst(new RequestExpectContinue(true))
+					.addInterceptorFirst(new RequestTargetHost()).addInterceptorFirst(new RequestUserAgent())
+					.addInterceptorFirst(new ResponseContentEncoding())
+					.setKeepAliveStrategy(new DefaultConnectionKeepAliveStrategy() {
+
+						@Override
+						public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+							long keepAlive = super.getKeepAliveDuration(response, context);
+							if (keepAlive == -1) {
+								// Keep connections alive if a keep-alive value
+								// has not be explicitly set by the server
+								keepAlive = KEEP_ALIVE;
+							}
+							return keepAlive;
+						}
+
+					}).build();
+			client.start();
+			return client;
+		} catch (IOReactorException e) {
+			LOGGER.error("create http-client failed!", e);
+			return null;
+		}
+	}
+
 	private static RequestConfig createCustomRequestConfig(NetworkConfig config) {
 		int connecTimeoutMillis = config.getInt(Keys.TCP_CONNECT_TIMEOUT);
 		int socketTimeoutSecs = config.getInt(Keys.TCP_CONNECTION_IDLE_TIMEOUT);
@@ -106,8 +147,6 @@ public class HttpClientFactory {
 		ConnectingIOReactor ioReactor = new DefaultConnectingIOReactor();
 
 		PoolingNHttpClientConnectionManager cm = new PoolingNHttpClientConnectionManager(ioReactor);
-		cm.setMaxTotal(250);
-		cm.setDefaultMaxPerRoute(50);
 
 		return cm;
 	}
