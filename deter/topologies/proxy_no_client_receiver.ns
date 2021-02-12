@@ -24,7 +24,7 @@ tb-set-node-os $receiver Ubuntu1804-STD
 tb-set-hardware $receiver good_hardware
 tb-set-node-startcmd $receiver "bash /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/node_setup.sh"
 
-$ns duplex-link $attacker $proxy        10Mbps   0ms DropTail
+$ns duplex-link $attacker $proxy        500Mbps   0ms DropTail
 $ns duplex-link $proxy    $originserver 1000Mbps 0ms DropTail
 $ns duplex-link $proxy    $receiver     1000Mbps 0ms DropTail
 
