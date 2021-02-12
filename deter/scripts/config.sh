@@ -39,8 +39,9 @@ PROFILER_DIR_NAME="async-profiler-1.8.3-linux-x64"
 PROFILE_BINARY_NAME="$PROFILER_DIR_NAME.tar.gz"
 PROFILE_BINARY_URL="https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/$PROFILE_BINARY_NAME"
 
-# Logging
+# Proxy
 DO_PROXY_LOGGING=0
+PROXY_CONNECTIONS=50
 
 TMP=/tmp
 TMP_DATA=/tmp/data

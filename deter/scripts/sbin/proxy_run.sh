@@ -14,12 +14,12 @@ rm -f $TMP_DATA/$PROXY_LOGNAME
 rm -f $TMP_DATA/$FLAMEGRAPH_NAME
 touch $TMP_DATA/$PROXY_LOGNAME
 
-proxy_args=""
+proxy_logging="nothanks"
 agentpath=""
 
 if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   # Include argument to do stdout logging in the proxy
-  proxy_args="log"
+  proxy_logging="log"
 fi
 
 if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
@@ -33,7 +33,7 @@ fi
 
 # Run the proxy with stderr and stdout redirected to proxy log
 echo "Running proxy..."
-((sudo java $agent $jvm_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_args) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
+((sudo java $agent $jvm_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
 
 # Wait until proxy pid shows up
 while [[ -z `pgrep java` ]]; do

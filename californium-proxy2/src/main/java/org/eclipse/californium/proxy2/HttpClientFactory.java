@@ -106,6 +106,8 @@ public class HttpClientFactory {
 			cm.setMaxTotal(numConnections);
 			cm.setDefaultMaxPerRoute(numConnections);
 
+			System.out.println("Max outstanding connections: " + cm.getMaxTotal());
+
 			final CloseableHttpAsyncClient client = HttpAsyncClientBuilder.create().disableCookieManagement()
 					.setDefaultRequestConfig(createCustomRequestConfig(config))
 					.setConnectionManager(cm).addInterceptorFirst(new RequestAcceptEncoding())
