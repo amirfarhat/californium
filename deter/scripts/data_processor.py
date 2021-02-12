@@ -82,13 +82,13 @@ def parse_from_tshark_line(message_string, is_receiver=False):
     message_code = parts[TSHARK_CODE_IDX][:-1] # Skip comma
   else:
     message_code = parts[TSHARK_CODE_IDX]
-    if message_code == "5.02":
+    if message_code in ["5.02", "5.04"]:
       # "Bad Gateway" pushes the token to the right
       TSHARK_TKN_IDX += 1
 
   # Find token start
   if not parts[TSHARK_TKN_IDX].startswith('TKN:'):
-    raise ValueError(parts[TSHARK_TKN_IDX])
+    raise ValueError(parts)
   message_token = parts[TSHARK_TKN_IDX].replace('TKN:', '')
 
   # Accumulate token pieces
