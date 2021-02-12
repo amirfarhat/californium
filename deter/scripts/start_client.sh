@@ -16,6 +16,8 @@ function log () {
   fi
 }
 
+sudo mkdir -p $TMP_DATA
+
 if [[ $TCPDUMP -eq 1 ]]; then
   log "Running client tcpdump...\n"
   screen -d -m sudo $BIN_HOME/run_tcpdump.sh client
