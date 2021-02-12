@@ -74,12 +74,13 @@ public class ExampleProxy2CoapClient {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		if (args.length != 2) {
-			System.out.println("Args [proxy url] [dest url]");
+		if (args.length != 3) {
+			System.out.println("Args [proxy url] [dest url] [num_messages int]");
 			System.exit(1);
 		}
 		String proxyUri = args[0];
 		String destinationUri = args[1];
+		int num_messages = Integer.parseInt(args[2]);
 
 		RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(NetworkConfig.getStandard());
 
@@ -91,7 +92,7 @@ public class ExampleProxy2CoapClient {
 		CoapResponse response;
 		long start;
 		
-		for (int i = 1; i <= 1000; i++) {
+		for (int i = 1; i <= num_messages; i++) {
 			request = Request.newGet();
 			request.setURI(proxyUri);
 			request.getOptions().setProxyUri(destinationUri);
