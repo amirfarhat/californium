@@ -98,7 +98,7 @@ for D in $exp_dir/*/; do
       pids+=($!)
     fi
     if [[ ! -f $D/proxy_messages.csv ]]; then
-      if [[ -f $out/processed_proxy_dump.out ]]; then
+      if [[ -f $D/processed_proxy_dump.out ]]; then
         (python3 data_processor.py -t proxy_dump -i $D/processed_proxy_dump.out -o $D/proxy_messages.csv) &
         pids+=($!)
       fi
