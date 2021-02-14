@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
+
 src=""
 dst=""
 
@@ -16,6 +18,5 @@ else
   exit 1
 fi
 
-
-cd /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/
+cd $DETER_HOME
 python fetchips_helper.py --src $src --dst $dst

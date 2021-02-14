@@ -29,6 +29,10 @@ function log () {
   fi
 }
 
+# Start internal IP discovery service
+cd $DETER_HOME
+sudo bash storeips.sh
+
 log "[CHECKPOINT] Starting experiment $_EXP_NAME\n"
 log "[CHECKPOINT] Running $_N trials\n"
 
