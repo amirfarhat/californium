@@ -56,6 +56,13 @@ for D in $exp_dir/*/; do
         pids+=($!)
       fi
     fi
+    # Process client dump
+    if [[ ! -f $D/processed_client_dump.out ]]; then
+      if [[ -f $D/client_dump.pcap ]]; then
+        (./process_tcpdump.sh $D/client_dump.pcap $D/processed_client_dump.out "client") &
+        pids+=($!)
+      fi
+    fi
   fi
 done
 # And wait for all processing to finish
@@ -75,6 +82,10 @@ for D in $exp_dir/*/; do
     fi
     if [[ ! -f $D/processed_proxy_dump.out ]]; then
       echo "Could not find proxy dump in $D"
+      exit 1
+    fi
+    if [[ ! -f $D/processed_client_dump.out ]]; then
+      echo "Could not find client dump in $D"
       exit 1
     fi
     if [[ ! -f $D/proxy.log ]]; then
@@ -101,6 +112,12 @@ for D in $exp_dir/*/; do
     if [[ ! -f $D/receiver_messages.csv ]]; then
       if [[ -f $D/receiver_dump.pcap ]]; then
         (python3 data_processor.py -t receiver_dump -i $D/processed_receiver_dump.out -o $D/receiver_messages.csv) &
+        pids+=($!)
+      fi
+    fi
+    if [[ ! -f $D/client_messages.csv ]]; then
+      if [[ -f $D/client_dump.pcap ]]; then
+        (python3 data_processor.py -t client_dump -i $D/processed_client_dump.out -o $D/client_messages.csv) &
         pids+=($!)
       fi
     fi

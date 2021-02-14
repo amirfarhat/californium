@@ -8,7 +8,7 @@ def parse_args():
   parser = argparse.ArgumentParser(description = '')
 
   parser.add_argument('-t', '--data-type', dest='data_type',
-                      help='', action='store', type=str.lower, choices=["attacker_dump", "proxy_dump", "receiver_dump", "proxy_log"])
+                      help='', action='store', type=str.lower, choices=["attacker_dump", "proxy_dump", "receiver_dump", "client_dump", "proxy_log"])
 
   parser.add_argument('-i', '--infile', dest='infile',
                       help='', action='store', type=str)
@@ -41,31 +41,47 @@ class ProxyLogValueException(Exception): pass
 # ====================================================================
 # ====================================================================
 
-def parse_from_tshark_line(message_string, is_receiver=False):
+def parse_from_tshark_line(message_string):
   """
+  # ---------------- Attacker / Proxy
+
   >>> parse_from_tshark_line("34 1612380142.546438      8.8.8.8 → 10.1.1.3     CoAP 92 CON, MID:4314, GET, TKN:23 5c 2f b7, coap://10.1.1.3/coap2http")
   ('1612380142.546438', '4314', '235c2fb7', 'GET')
   
   >>> parse_from_tshark_line("437298 1612380162.414260      8.8.8.8 → 10.1.1.3     CoAP 92 CON, MID:50693, GET, TKN:cf fe a6 6c, coap://10.1.1.3/coap2http")
   ('1612380162.414260', '50693', 'cffea66c', 'GET')
   
-  >>> parse_from_tshark_line("31434 1612992383.976399     10.1.1.2 → 10.1.1.3     CoAP 183 ACK, MID:59721, 2.05 Content, TKN:be e3 9e 2e", is_receiver=True)
+  # ---------------- Receiver
+
+  >>> parse_from_tshark_line("31434 1612992383.976399     10.1.1.2 → 10.1.1.3     CoAP 183 ACK, MID:59721, 2.05 Content, TKN:be e3 9e 2e")
   ('1612992383.976399', '59721', 'bee39e2e', '2.05')
   
-  >>> parse_from_tshark_line("31435 1612992383.995075     10.1.1.2 → 10.1.1.3     CoAP 62 ACK, MID:59785, 5.02 Bad Gateway, TKN:04 4d eb 22", is_receiver=True)
+  >>> parse_from_tshark_line("31435 1612992383.995075     10.1.1.2 → 10.1.1.3     CoAP 62 ACK, MID:59785, 5.02 Bad Gateway, TKN:04 4d eb 22")
   ('1612992383.995075', '59785', '044deb22', '5.02')
+
+  # ---------------- Client
+
+  >>> parse_from_tshark_line("67135 1613161431.703387     10.1.1.2 → 10.1.1.3     CoAP 88 CON, MID:33568, GET, TKN:93 48 5b a2 53 52 fc d6, /coap2http")
+  ('1613161431.703387', '33568', '93485ba25352fcd6', 'GET')
+
+  >>> parse_from_tshark_line("67137 1613161431.706885     10.1.1.2 → 10.1.1.3     CoAP 88 CON, MID:33569, GET, TKN:23 5c df f3 fb f2 db fc, /coap2http")
+  ('1613161431.706885', '33569', '235cdff3fbf2dbfc', 'GET')
+  
+  >>> parse_from_tshark_line("67136 1613161431.706736     10.1.1.3 → 10.1.1.2     CoAP 187 ACK, MID:33568, 2.05 Content, TKN:93 48 5b a2 53 52 fc d6, /coap2http")
+  ('1613161431.706736', '33568', '93485ba25352fcd6', '2.05')
+  
+  >>> parse_from_tshark_line("67138 1613161431.738468     10.1.1.3 → 10.1.1.2     CoAP 62 ACK, MID:33569, 5.02 Bad Gateway, TKN:23 5c df f3 fb f2 db fc, /coap2http")
+  ('1613161431.738468', '33569', '235cdff3fbf2dbfc', '5.02')
+  >>>
   """
   # Normal Format: 1 1612380142.546085      8.8.8.8 → 10.1.1.3     CoAP 92 CON, MID:4281, GET, TKN:f4 22 27 39, coap://10.1.1.3/coap2http
   # Recv   Format: 31435 1612992383.995075     10.1.1.2 → 10.1.1.3     CoAP 62 ACK, MID:59785, 5.02 Bad Gateway, TKN:04 4d eb 22
   parts = message_string.split()
 
   # Set parsing parameters
+  TSHARK_TIME_IDX = 1
   TSHARK_MID_IDX = 8
   TSHARK_CODE_IDX = 9
-  TSHARK_TKN_IDX = 10
-  TSHARK_TIME_IDX = 1
-  if is_receiver:
-    TSHARK_TKN_IDX += 1
 
   # Parse time
   message_timestamp = parts[TSHARK_TIME_IDX]
@@ -82,18 +98,20 @@ def parse_from_tshark_line(message_string, is_receiver=False):
     message_code = parts[TSHARK_CODE_IDX][:-1] # Skip comma
   else:
     message_code = parts[TSHARK_CODE_IDX]
-    if message_code in ["5.02", "5.04"]:
-      # "Bad Gateway" pushes the token to the right
-      TSHARK_TKN_IDX += 1
 
   # Find token start
+  TSHARK_TKN_IDX = None
+  for i in range(TSHARK_CODE_IDX, len(parts)):
+    if parts[i].startswith('TKN:'):
+      TSHARK_TKN_IDX = i
+      break
   if not parts[TSHARK_TKN_IDX].startswith('TKN:'):
     raise ValueError(parts)
   message_token = parts[TSHARK_TKN_IDX].replace('TKN:', '')
 
   # Accumulate token pieces
   for i in range(TSHARK_TKN_IDX + 1, len(parts)):
-    if parts[i].startswith('coap://'):
+    if parts[i].startswith('coap://') or parts[i].startswith('/coap2http'):
       # Skip options
       break
     message_token += parts[i].strip(',')
@@ -147,7 +165,7 @@ def parse_from_proxy_log(log_line):
 # ====================================================================
 # ====================================================================
 
-def ingest_tcpdump(infile, outfile, is_receiver=False):
+def ingest_tcpdump(infile, outfile):
   with open(outfile, 'w') as outf:
     # Write fields of the header
     fieldnames = ['message_timestamp', 'message_id', 'message_token', 'event']
@@ -158,7 +176,7 @@ def ingest_tcpdump(infile, outfile, is_receiver=False):
       for L in inf:
         try: 
           # Parse fields from input file
-          mtimestamp, mid, mtoken, mcode = parse_from_tshark_line(L, is_receiver)
+          mtimestamp, mid, mtoken, mcode = parse_from_tshark_line(L)
           
           # Write fields to output file
           writer.writerow({'message_timestamp': mtimestamp,
@@ -196,7 +214,6 @@ if __name__ == "__main__":
   doctest.testmod()
 
   if args.data_type.endswith("_dump"):
-    is_receiver = "receiver" in args.data_type
-    ingest_tcpdump(args.infile, args.outfile, is_receiver)
+    ingest_tcpdump(args.infile, args.outfile)
   else:
     ingest_proxy_log(args.infile, args.outfile)

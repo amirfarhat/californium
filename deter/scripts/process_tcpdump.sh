@@ -8,11 +8,12 @@ input_file=$1
 output_file=$2
 
 node_type=$3
-if [[ $node_type == "receiver" ]]; then
+if [[ $node_type == "receiver" ]] || [[ $node_type == "client" ]]; then
   filter="coap"
 else
   filter="coap && coap.type == 0"
 fi
+echo $filter
 
 # Run wireshark CLI to get CoAP message summary
 tshark \
