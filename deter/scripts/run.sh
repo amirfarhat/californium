@@ -80,17 +80,17 @@ for ((i=1; i<=$_N; i++)); do
   sleep $PAUSE_TIME
   log "OK\n"
 
-  # Attacker
-  if [[ $RUN_ATTACKER -eq 1 ]]; then
-    log "[LAUNCH] Starting attackers...\n"
-    ssh $RUN_USER@$ATTACKER_NAME "sudo $SCRIPTS_HOME/start_attacker.sh -v"
-    log "OK\n"
-  fi
-
   # Client
   if [[ $RUN_CLIENT -eq 1 ]]; then
     log "[LAUNCH] Starting clients...\n"
     ssh $RUN_USER@$CLIENT_NAME "sudo $SCRIPTS_HOME/start_client.sh -v"
+    log "OK\n"
+  fi
+
+  # Attacker
+  if [[ $RUN_ATTACKER -eq 1 ]]; then
+    log "[LAUNCH] Starting attackers...\n"
+    ssh $RUN_USER@$ATTACKER_NAME "sudo $SCRIPTS_HOME/start_attacker.sh -v"
     log "OK\n"
   fi
 

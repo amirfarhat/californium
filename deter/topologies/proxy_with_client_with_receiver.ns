@@ -1,7 +1,7 @@
 set ns [new Simulator]
 source tb_compat.tcl
 
-tb-make-soft-vtype weak_hardware {pc2133 pc3060 pc3100 pc2133n}
+tb-make-soft-vtype weak_hardware {pc2133 pc3060 pc3100 pc2133n bpc2133 bpc3000 bpc3060}
 tb-make-soft-vtype good_hardware {dl380g3 MicroCloud}
 
 set client [$ns node]
@@ -30,7 +30,7 @@ tb-set-hardware $receiver good_hardware
 tb-set-node-startcmd $receiver "bash /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/node_setup.sh"
 
 set Link-1 [$ns duplex-link client   proxy        10Mbps   0ms DropTail]
-set Link-2 [$ns duplex-link attacker proxy        10Mbps   0ms DropTail]
+set Link-2 [$ns duplex-link attacker proxy        1Mbps    0ms DropTail]
 set Link-3 [$ns duplex-link proxy    originserver 1000Mbps 0ms DropTail]
 set Link-4 [$ns duplex-link proxy    receiver     1000Mbps 0ms DropTail]
 
