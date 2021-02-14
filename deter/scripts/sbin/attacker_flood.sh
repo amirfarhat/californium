@@ -5,7 +5,9 @@ source /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/scripts/config.sh
 rm -f $TMP_DATA/$ATTACKER_LOGNAME
 touch $TMP_DATA/$ATTACKER_LOGNAME
 
-PROXY_IP=$PROXY_IP_FOR_ATTACKER
+PROXY_IP=`bash $DETER_HOME/fetchips.sh proxy`
+ATTACKER_SPOOFED_IP=`bash $DETER_HOME/fetchips.sh proxy receiver`
+ORIGIN_SERVER_IP=`bash $DETER_HOME/fetchips.sh proxy originserver`
 
 (python3 $DETER_HOME/coapspoofer.py \
   --debug \
