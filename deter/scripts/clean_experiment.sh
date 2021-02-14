@@ -16,7 +16,7 @@ exp_dir="$DATA_DIR/$experiment_name"
 
 cd $SCRIPTS_DIR
 
-for D in $exp_dir/*; do
+for D in $exp_dir; do
   if [[ -d $D ]]; then
     echo "Looking for processed files in $D..."
 
