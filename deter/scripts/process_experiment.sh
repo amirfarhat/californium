@@ -98,25 +98,25 @@ for D in $exp_dir/*/; do
       pids+=($!)
     fi
     if [[ ! -f $D/proxy_messages.csv ]]; then
-      if [[ -f $D/processed_proxy_dump.pcap ]]; then
+      if [[ -f $out/processed_proxy_dump.pcap ]]; then
         (python3 data_processor.py -t proxy_dump -i $D/processed_proxy_dump.out -o $D/proxy_messages.csv) &
         pids+=($!)
       fi
     fi
     if [[ ! -f $D/attacker_messages.csv ]]; then
-      if [[ -f $D/processed_attacker_dump.pcap ]]; then
+      if [[ -f $D/processed_attacker_dump.out ]]; then
         (python3 data_processor.py -t attacker_dump -i $D/processed_attacker_dump.out -o $D/attacker_messages.csv) &
         pids+=($!)
       fi
     fi
     if [[ ! -f $D/receiver_messages.csv ]]; then
-      if [[ -f $D/processed_receiver_dump.pcap ]]; then
+      if [[ -f $D/processed_receiver_dump.out ]]; then
         (python3 data_processor.py -t receiver_dump -i $D/processed_receiver_dump.out -o $D/receiver_messages.csv) &
         pids+=($!)
       fi
     fi
     if [[ ! -f $D/client_messages.csv ]]; then
-      if [[ -f $D/processed_client_dump.pcap ]]; then
+      if [[ -f $D/processed_client_dump.out ]]; then
         (python3 data_processor.py -t client_dump -i $D/processed_client_dump.out -o $D/client_messages.csv) &
         pids+=($!)
       fi
