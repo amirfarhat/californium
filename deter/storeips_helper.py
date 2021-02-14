@@ -1,5 +1,3 @@
-from pprint import pprint
-
 fname = "exp_links_info.txt"
 link_map_nodes = dict()
 node_map_links = dict()
@@ -38,8 +36,6 @@ for n1 in node_names:
       if n2 == n1:
         continue
       records[n1].append(n2_ip_tuple)
-
-pprint(records)
 
 # Write this information in separate files
 for n1, other_nodes in sorted(records.items()):

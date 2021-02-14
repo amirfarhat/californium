@@ -16,4 +16,6 @@ else
   exit 1
 fi
 
+
+cd /proj/MIT-DoS/exp/coap-setup/deps/californium/deter/
 python fetchips_helper.py --src $src --dst $dst
