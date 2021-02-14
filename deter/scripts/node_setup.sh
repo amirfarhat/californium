@@ -27,6 +27,8 @@ sudo apt install -y default-jdk default-jre
 
 # Set small index.html as Apache homepage
 sudo cp $UTILS_HOME/index.html /var/www/html/index.html
+sudo cp $UTILS_HOME/apache2.conf /etc/apache2/apache2.conf
+sudo cp $UTILS_HOME/.htaccess /var/www/html/.htaccess
 
 # Set custom bashrc
 sudo cp $UTILS_HOME/.bashrc ~/.bashrc
