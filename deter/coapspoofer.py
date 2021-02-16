@@ -218,7 +218,7 @@ class CoAPMessage:
   COAP_VERSION = 1
   COAP_MSG_STR_TO_ID = { 'CON':0, 'NON':1, 'ACK':2, 'RST':3 }
 
-  def __init__(self, msg_id=None, proxy_uri_suffix=""):
+  def __init__(self, msg_id=None, suffix_mid_tok=False):
     if msg_id is None:
       msg_id = args.message_id
 
@@ -251,10 +251,12 @@ class CoAPMessage:
 
     # Construct proxy-specific mappings
     self.options = OrderedDict()
-    self.options['uri_host']  = (3,  args.uri_host),
-    self.options['uri_path']  = (11, args.uri_path),
-    # self.options['proxy_uri'] = (35, f"{args.proxy_uri}/{proxy_uri_suffix}"),
-    self.options['proxy_uri'] = (35, f"{args.proxy_uri}"),
+    self.options['uri_host']  = [3,  args.uri_host],
+    self.options['uri_path']  = [11, args.uri_path],
+    uri = f"{args.proxy_uri}"
+    if suffix_mid_tok:
+      uri += f"/{self.message_id}_{self.token.hex()}"
+    self.options['proxy_uri'] = [35, uri],
 
     self.payload = bytes(args.payload, "utf-8")
 
@@ -465,10 +467,9 @@ def create_socket():
   return sock
 
 def coap_message_generator():
-  offset = 0
 
   # Generate first message
-  coap_message = CoAPMessage(proxy_uri_suffix=offset)
+  coap_message = CoAPMessage(suffix_mid_tok=True)
   yield coap_message
   
   while True:
@@ -477,10 +478,9 @@ def coap_message_generator():
 
     # Increment previous parameters
     mid = ((mid + 1) % CoAPMessage.MAX_MESSAGE_ID)
-    offset += 1
 
     # Generate next message
-    coap_message = CoAPMessage(msg_id=mid, proxy_uri_suffix=offset)
+    coap_message = CoAPMessage(msg_id=mid, suffix_mid_tok=True)
     yield coap_message
 
 def send_coap_message(sock, message):
