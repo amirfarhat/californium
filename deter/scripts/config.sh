@@ -55,7 +55,8 @@ PROFILE_BINARY_URL="https://github.com/jvm-profiling-tools/async-profiler/releas
 ORIGIN_SERVER_NAME="originserver.coap-setup.MIT-DoS.isi.deterlab.net"
 ORIGIN_SERVER_TCPDUMP="server_dump.pcap"
 ORIGIN_SERVER_PERF="server_perf.data"
-ORIGIN_SERVER_LOGNAME="server.log"
+ORIGIN_SERVER_ACCESS_LOGNAME="server_access.log"
+ORIGIN_SERVER_ERROR_LOGNAME="server_error.log"
 ORIGIN_SERVER_PORT=80
 
 # Receiver
