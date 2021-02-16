@@ -17,7 +17,7 @@ sudo rm -f $TMP_DATA/$CLIENT_LOGNAME
 sudo touch $TMP_DATA/$CLIENT_LOGNAME
 
 proxy_uri="coap://$PROXY_IP:$PROXY_COAP_PORT/coap2http"
-destination_uri="http://$ORIGIN_SERVER_IP:$ORIGIN_SERVER_PORT/"
+destination_uri="http://$ORIGIN_SERVER_IP:$ORIGIN_SERVER_PORT"
 
 echo "Running client..."
 ((sudo java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar ExampleProxy2CoapClient "$proxy_uri" "$destination_uri" "$NUM_CLIENT_MESSAGES") > $TMP_DATA/$CLIENT_LOGNAME 2>&1) &

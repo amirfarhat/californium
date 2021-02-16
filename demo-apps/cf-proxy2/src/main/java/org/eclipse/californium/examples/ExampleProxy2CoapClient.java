@@ -75,7 +75,7 @@ public class ExampleProxy2CoapClient {
 
 	public static void main(String[] args) throws InterruptedException {
 		if (args.length != 3) {
-			System.out.println("Args [proxy url] [dest url] [num_messages int]");
+			System.out.println("Args [proxy uri] [dest uri] [num_messages int]");
 			System.exit(1);
 		}
 		String proxyUri = args[0];
@@ -87,7 +87,7 @@ public class ExampleProxy2CoapClient {
 		CoapClient client = new CoapClient();
 		client.useCONs();
 
-		String midTok, suffix;
+		String midTok, suffix, destinationUriWithMidTok;
 		Request request;
 		CoapResponse response;
 		long start;
@@ -95,10 +95,11 @@ public class ExampleProxy2CoapClient {
 		for (int i = 1; i <= num_messages; i++) {
 			request = Request.newGet();
 			request.setURI(proxyUri);
-			request.getOptions().setProxyUri(destinationUri);
 			request.setMID(i);
 			request.setToken(tokenGenerator.createToken(Scope.LONG_TERM));
 			midTok = request.getMID() + "_" + request.getTokenString();
+			destinationUriWithMidTok = destinationUri + "/" + midTok;
+			request.getOptions().setProxyUri(destinationUriWithMidTok);
 
 			System.out.println("" + System.currentTimeMillis() + " SEND " + midTok);
 			response = request(client, request);
