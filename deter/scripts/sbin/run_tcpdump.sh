@@ -8,7 +8,7 @@ if [[ $node_type == "proxy" ]]; then
   sleep_amt=$PROXY_DURATION
   rm -f $TMP_DATA/$PROXY_TCPDUMP
   touch $TMP_DATA/$PROXY_TCPDUMP
-  eval "tcpdump -n -i any port '($ORIGIN_SERVER_PORT or $PROXY_COAP_PORT)' -w $TMP_DATA/$PROXY_TCPDUMP &"
+  eval "tcpdump -n -i any port '($ORIGIN_SERVER_PORT or $PROXY_COAP_PORT or $RECEIVER_COAP_PORT)' -w $TMP_DATA/$PROXY_TCPDUMP &"
 
 elif [[ $node_type == "attacker" ]]; then
   sleep_amt=$PROXY_DURATION

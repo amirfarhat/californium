@@ -15,7 +15,6 @@ rm -f $TMP_DATA/$FLAMEGRAPH_NAME
 touch $TMP_DATA/$PROXY_LOGNAME
 
 proxy_logging="nothanks"
-agentpath=""
 
 if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   # Include argument to do stdout logging in the proxy
@@ -26,14 +25,11 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   # Set kernel parameters to enable perf profiling
   sudo sysctl -w kernel.perf_event_paranoid=1
   sudo sysctl -w kernel.kptr_restrict=0
-
-  # Specify agent for CPU profiling 
-  agent="-agentpath:$UTILS_HOME/$PROFILER_DIR_NAME/build/libasyncProfiler.so=start,event=cpu"
 fi
 
 # Run the proxy with stderr and stdout redirected to proxy log
 echo "Running proxy..."
-((sudo java $agent $jvm_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
+((sudo java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
 
 # Wait until proxy pid shows up
 while [[ -z `pgrep java` ]]; do
@@ -41,6 +37,14 @@ while [[ -z `pgrep java` ]]; do
 done
 proxy_pid=`pgrep java`
 echo "Ran proxy with pid $proxy_pid..."
+
+# Start profiler
+if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
+  cd $UTILS_HOME/$PROFILER_DIR_NAME
+  echo "Starting profiling..."
+  sudo ./profiler.sh start -e $PROFILING_EVENT $proxy_pid
+  echo "Done"
+fi
 
 echo "Sleeping for $PROXY_DURATION seconds..."
 sleep $PROXY_DURATION
@@ -54,7 +58,7 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   # Stop profiling and dump output
   cd $UTILS_HOME/$PROFILER_DIR_NAME
   echo "Stopping profiling..."
-  sudo ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1600 $proxy_pid
+  sudo ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1400 --title $PROFILING_EVENT $proxy_pid
   echo "Done"
 fi
 
