@@ -11,6 +11,7 @@ touch $TMP_DATA/$ORIGIN_SERVER_ERROR_LOGNAME
 if [[ $ORIGIN_SERVER_APACHE -eq 1 ]]; then
   # Start server async, sleep, then kill
   sudo /etc/init.d/apache2 start
+  sudo /etc/init.d/apache2 restart
   sleep $ORIGIN_SERVER_DURATION
   sudo /etc/init.d/apache2 stop
   
