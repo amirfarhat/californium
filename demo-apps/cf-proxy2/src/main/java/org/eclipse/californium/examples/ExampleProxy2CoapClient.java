@@ -63,6 +63,7 @@ import org.eclipse.californium.proxy2.resources.ProxyHttpClientResource;
 public class ExampleProxy2CoapClient {
 
 	private static final int PROXY_PORT = 5683;
+	private static final int MAX_MID = 64999;
 
 	private static CoapResponse request(CoapClient client, Request request) {
 		try {
@@ -95,7 +96,8 @@ public class ExampleProxy2CoapClient {
 		for (int i = 1; i <= num_messages; i++) {
 			request = Request.newGet();
 			request.setURI(proxyUri);
-			request.setMID(i);
+			// Need to mod by MAX_MID to avoid multicase MID range
+			request.setMID(i % MAX_MID);
 			request.setToken(tokenGenerator.createToken(Scope.LONG_TERM));
 			midTok = request.getMID() + "_" + request.getTokenString();
 			destinationUriWithMidTok = destinationUri + "/" + midTok;
