@@ -25,10 +25,11 @@ sudo apt install -y iperf traceroute moreutils apache2 httpie linux-tools-generi
 # Install Java: JDK, JRE
 sudo apt install -y default-jdk default-jre
 
-# Set small index.html as Apache homepage
+# Configure Apache
 yes | sudo cp $UTILS_HOME/index.html /var/www/html/index.html
 yes | sudo cp $UTILS_HOME/apache2.conf /etc/apache2/apache2.conf
 yes | sudo cp $UTILS_HOME/.htaccess /var/www/html/.htaccess
+sudo a2enmod rewrite
 
 # Set custom bashrc
 yes | sudo cp $UTILS_HOME/.bashrc ~/.bashrc
