@@ -23,15 +23,15 @@ sudo touch $OPLOG
 
 if [[ $TCPDUMP -eq 1 ]]; then
   log "Running proxy tcpdump...\n"
-  sudo screen -d -m -L -Logfile $OPLOG sudo $BIN_HOME/run_tcpdump.sh proxy
+  sudo screen -c $UTILS_HOME/oplog.conf -d -m -L -Logfile $OPLOG sudo $BIN_HOME/run_tcpdump.sh proxy
 
 fi
 
 if [[ $PROXY_TOP -eq 1 ]]; then
   log "Running proxy top...\n"
-  sudo screen -d -m -L -Logfile $OPLOG sudo $BIN_HOME/top.sh
+  sudo screen -c $UTILS_HOME/oplog.conf -d -m -L -Logfile $OPLOG sudo $BIN_HOME/top.sh
   
 fi
 
 log "Running proxy...\n"
-sudo screen -d -m -L -Logfile $OPLOG sudo $BIN_HOME/proxy_run.sh
+sudo screen -c $UTILS_HOME/oplog.conf -d -m -L -Logfile $OPLOG sudo $BIN_HOME/proxy_run.sh
