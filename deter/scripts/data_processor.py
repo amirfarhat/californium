@@ -29,8 +29,9 @@ class ProxyLogValueException(Exception): pass
 # ====================================================================
 # ====================================================================
 
-def parse_protocol_information(fieldmap, parts):
+def parse_protocol_information(fieldmap, parts, uid_map_number):
   protocol = fieldmap['message_protocol']
+  uid = None
 
   if protocol == "coap":
     try:
@@ -61,6 +62,9 @@ def parse_protocol_information(fieldmap, parts):
         if len(parts[i]) == 2:
           coap_token += parts[i]
       fieldmap['coap_token'] = coap_token
+      
+      uid = f"{coap_message_id}_{coap_token}"
+      
     except IndexError as e:
       # print(parts)
       raise e
@@ -72,11 +76,16 @@ def parse_protocol_information(fieldmap, parts):
       # Only support HTTP requests, since responses don't have URI in tshark
       fieldmap['http_code'] = http_code
       fieldmap['http_resource'] = http_resource
+      uid = http_resource.lstrip("/")
 
   else:
     raise ValueError(f"Uncrecognized protocol {protocol}")
 
-def process_line(writer, fieldmap, line):
+  # Add to uid map
+  uid_map_number.setdefault(uid, 1 + len(uid_map_number))
+  fieldmap["message_number"] = uid_map_number[uid]
+
+def process_line(writer, fieldmap, line, uid_map_number):
   # Structure of a tshark line entry
   TSHARK_TIME  = 1
   TSHARK_SRC   = 2
@@ -119,8 +128,8 @@ def process_line(writer, fieldmap, line):
 
   # Enagage protocol-specific parsing
   protocol_info_parts = parts[TSHARK_INFO:]
-  parse_protocol_information(fieldmap, protocol_info_parts)
-
+  parse_protocol_information(fieldmap, protocol_info_parts, uid_map_number)
+  
   # Write record
   writer.writerow(fieldmap)
 
@@ -135,23 +144,27 @@ def process_line(writer, fieldmap, line):
 
 def ingest_tcpdumps(writer, fieldnames, infile_list):
   # Parse node type from filename
-  nodes = []
+  nodes = dict()
   for infile in infile_list:
     parts = infile.split('/')
     end = parts[-1].index("_dump")
     n = parts[-1][:end]
-    nodes.append(n)
+    nodes[infile] = n
 
   # Process each file
-  for infile, node in zip(infile_list, nodes):
+  uid_map_number = dict()
+  for infile in sorted(infile_list):
+    # Attacker dump must be first to populate uid_map_number
+    node = nodes[infile]
     with open(infile, 'r') as inf:
       for L in inf:
         # Write node type
         fieldmap = { f : "" for f in fieldnames }
         fieldmap['node_type'] = node
+        fieldmap['message_number'] = -1
         
         # Process each line of the file
-        process_line(writer, fieldmap, L)
+        process_line(writer, fieldmap, L, uid_map_number)
         
 if __name__ == "__main__":
   import doctest
@@ -163,6 +176,7 @@ if __name__ == "__main__":
   with open(args.outfile, 'w') as outf:
     # Write fields of the header
     fieldnames = ['node_type',
+                  'message_number',
                   'message_timestamp', 
                   'message_source',
                   'message_destination',
