@@ -16,14 +16,20 @@ exp_dir="$DATA_DIR/$experiment_name"
 
 cd $SCRIPTS_DIR
 
-for D in $exp_dir/*/; do
+for D in $exp_dir/*; do
   if [[ -d $D ]]; then
-    echo "Looking for processed files in $D..."
+    echo "Looking for processed files in `basename $D`..."
 
     # Processed dumps
-    rm $D/*_dump.out
+    for processed_dump in $D/*.out; do
+      echo "Removing `basename $processed_dump`..."
+      rm $processed_dump
+    done
     
     # Csvs
-    rm $D/*_messages.csv
+    for dump_csv in $D/*.csv; do
+      echo "Removing `basename $dump_csv`..."
+      rm $dump_csv
+    done
   fi
 done

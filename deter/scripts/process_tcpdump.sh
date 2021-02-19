@@ -1,24 +1,21 @@
 #!/bin/bash
 
-# TODO: See mergecap
-# https://www.wireshark.org/docs/wsug_html_chunked/ChIOMergeSection.html
-
+# Parse inputs
+me=`basename "$0"`
 input_file=$1
-
 output_file=$2
-
-node_type=$3
-if [[ $node_type == "receiver" ]] || [[ $node_type == "client" ]]; then
-  filter="coap"
-else
-  filter="coap && coap.type == 0"
+if [[ -z "$input_file" ]] || [[ -z "$output_file" ]]; then
+  echo "$me: Usage [input_file] [output_file]"
+  exit 1
 fi
-echo $filter
 
-# Run wireshark CLI to get CoAP message summary
-tshark \
-  -r $input_file \
+filter="coap || http"
+
+# Run tshark in the backend to handle parsing and 
+# high-level protocol filtering
+(tshark \
+  -r "$input_file" \
   -2 \
   -n \
   -R "$filter" \
-  -t e > $output_file
+  -t e) > "$output_file"
