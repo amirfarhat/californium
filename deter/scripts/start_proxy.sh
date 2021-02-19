@@ -18,15 +18,20 @@ function log () {
 
 sudo mkdir -p $TMP_DATA
 
+OPLOG=$TMP_DATA/proxy_ops.log
+sudo touch $OPLOG
+
 if [[ $TCPDUMP -eq 1 ]]; then
   log "Running proxy tcpdump...\n"
-  screen -d -m sudo $BIN_HOME/run_tcpdump.sh proxy
+  sudo screen -d -m -L -Logfile $OPLOG sudo $BIN_HOME/run_tcpdump.sh proxy
+
 fi
 
 if [[ $PROXY_TOP -eq 1 ]]; then
   log "Running proxy top...\n"
-  screen -d -m sudo $BIN_HOME/top.sh
+  sudo screen -d -m -L -Logfile $OPLOG sudo $BIN_HOME/top.sh
+  
 fi
 
 log "Running proxy...\n"
-screen -d -m sudo $BIN_HOME/proxy_run.sh
+sudo screen -d -m -L -Logfile $OPLOG sudo $BIN_HOME/proxy_run.sh

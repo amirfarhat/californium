@@ -29,12 +29,13 @@ fi
 
 # Run the proxy with stderr and stdout redirected to proxy log
 echo "Running proxy..."
-((java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
+((sudo java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
 
 # Wait until proxy pid shows up
 while [[ -z `pgrep java` ]]; do
   sleep 0.1
 done
+echo "Found pids `pgrep java`"
 proxy_pid=`pgrep java`
 echo "Ran proxy with pid $proxy_pid..."
 
