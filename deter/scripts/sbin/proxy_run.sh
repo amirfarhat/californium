@@ -35,6 +35,9 @@ echo "Running proxy..."
 while [[ -z `pgrep java` ]]; do
   sleep 0.1
 done
+
+eval "ps aux | grep java"
+
 echo "Found pids `pgrep java`"
 proxy_pid=`pgrep java`
 echo "Ran proxy with pid $proxy_pid..."
