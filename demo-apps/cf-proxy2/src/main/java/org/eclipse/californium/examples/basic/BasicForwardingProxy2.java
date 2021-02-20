@@ -106,6 +106,7 @@ public class BasicForwardingProxy2 {
 		
 		coapProxyServer.start();
 		System.out.println("** CoAP Proxy at: coap://localhost:" + port);
+		System.out.println("Heap size in MB: " + Runtime.getRuntime().maxMemory() / (1000*1000));
 	}
 
 	public static void main(String args[]) throws IOException {
