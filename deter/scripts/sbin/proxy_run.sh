@@ -29,7 +29,7 @@ fi
 
 # Run the proxy with stderr and stdout redirected to proxy log
 echo "Running proxy..."
-((sudo java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME) &
+((java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
 
 # Wait until proxy pid shows up
 while [[ -z `pgrep java` ]]; do
@@ -46,7 +46,7 @@ echo "Ran proxy with pid $proxy_pid..."
 if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   cd $UTILS_HOME/$PROFILER_DIR_NAME
   echo "Starting profiling..."
-  sudo ./profiler.sh start -e $PROFILING_EVENT $proxy_pid
+  ./profiler.sh start -t -e $PROFILING_EVENT $proxy_pid
   echo "Done"
 fi
 
@@ -62,7 +62,7 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   # Stop profiling and dump output
   cd $UTILS_HOME/$PROFILER_DIR_NAME
   echo "Stopping profiling..."
-  sudo ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1400 --title $PROFILING_EVENT $proxy_pid
+  ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1500 --title $PROFILING_EVENT $proxy_pid
   echo "Done"
 fi
 
