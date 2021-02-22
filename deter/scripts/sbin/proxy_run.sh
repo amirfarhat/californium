@@ -15,6 +15,8 @@ rm -f $TMP_DATA/$FLAMEGRAPH_NAME
 touch $TMP_DATA/$PROXY_LOGNAME
 
 proxy_logging="nothanks"
+pid_error_file="$TMP_DATA/java_error%p.log"
+proxy_args="-XX:ErrorFile=$pid_error_file -Xmx${PROXY_HEAP_SIZE_MB}m"
 
 if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   # Include argument to do stdout logging in the proxy
@@ -29,7 +31,7 @@ fi
 
 # Run the proxy with stderr and stdout redirected to proxy log
 echo "Running proxy..."
-((java -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
+((java $proxy_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
 
 # Wait until proxy pid shows up
 while [[ -z `pgrep java` ]]; do
@@ -68,6 +70,7 @@ fi
 
 # Kill proxy
 echo "Killing $proxy_pid..."
+sudo kill $proxy_pid
 sudo kill -9 $proxy_pid
 echo "Done"
 
