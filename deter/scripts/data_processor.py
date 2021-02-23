@@ -29,54 +29,42 @@ class ProxyLogValueException(Exception): pass
 # ====================================================================
 # ====================================================================
 
-def parse_protocol_information(fieldmap, parts, uid_map_number):
+def parse_protocol_information(fieldmap, row, uid_map_number):
   protocol = fieldmap['message_protocol']
   uid = None
 
   if protocol == "coap":
-    try:
-      COAP_TYPE = 0
-      # Then there's the MID header
-      COAP_MID  = 2
-      COAP_CODE = 3
+    # Core CoAP Fields
+    fieldmap["coap_type"] = row["coap.type"]
+    fieldmap["coap_code"] = row["coap.code"]
+    fieldmap["coap_message_id"] = row["coap.mid"]
+    fieldmap["coap_token"] = row["coap.token"]
 
-      # Message Type
-      coap_type = parts[COAP_TYPE]
-      fieldmap['coap_type'] = coap_type
-      
-      # Message ID
-      coap_message_id = parts[COAP_MID]
-      fieldmap['coap_message_id'] = coap_message_id
+    # CoAP Options
+    fieldmap["coap_proxy_uri"] = row["coap.opt.proxy_uri"]
 
-      # Message Code
-      coap_code = parts[COAP_CODE]
-      fieldmap['coap_code'] = coap_code
-
-      # Message Token
-      COAP_TKN = COAP_CODE + 1
-      while parts[COAP_TKN] != 'tkn':
-        COAP_TKN += 1
-      COAP_TKN += 1 # Go to first byte
-      coap_token = ""
-      for i in range(COAP_TKN, len(parts)):
-        if len(parts[i]) == 2:
-          coap_token += parts[i]
-      fieldmap['coap_token'] = coap_token
-      
-      uid = f"{coap_message_id}_{coap_token}"
-      
-    except IndexError as e:
-      # print(parts)
-      raise e
+    # Uid is made from the CoAP message ID and token
+    coap_message_id = fieldmap["coap_message_id"]
+    coap_token = fieldmap["coap_token"]
+    uid = f"{coap_message_id}_{coap_token}"
 
   elif protocol == "http":
-    http_code = parts[0]
-    http_resource = parts[1]
-    if http_code == "get":
-      # Only support HTTP requests, since responses don't have URI in tshark
-      fieldmap['http_code'] = http_code
-      fieldmap['http_resource'] = http_resource
-      uid = http_resource.lstrip("/")
+    # Is HTTP request?
+    fieldmap["http_request"] = row["http.request"]
+    fieldmap["http_request_method"] = row["http.request.method"]
+    fieldmap["http_request_full_uri"] = row["http.request.full_uri"]
+
+    # Is HTTP response?
+    fieldmap["http_response"] = row["http.response"]
+    fieldmap["http_response_code"] = row["http.response.code"]
+    fieldmap["http_response_code_desc"] = row["http.response.code.desc"]
+    fieldmap["http_response_for_uri"] = row["http.response_for.uri"]
+
+    # Get whichever URI is first and not empty string
+    uri = fieldmap["http_request_full_uri"] or fieldmap["http_response_for_uri"]
+
+    # Uid (from CoAP message ID and token), is the requested resource
+    uid = uri.split("/")[-1]
 
   else:
     raise ValueError(f"Uncrecognized protocol {protocol}")
@@ -85,50 +73,35 @@ def parse_protocol_information(fieldmap, parts, uid_map_number):
   uid_map_number.setdefault(uid, 1 + len(uid_map_number))
   fieldmap["message_number"] = uid_map_number[uid]
 
-def process_line(writer, fieldmap, line, uid_map_number):
-  # Structure of a tshark line entry
-  TSHARK_TIME  = 1
-  TSHARK_SRC   = 2
-  # Then there is a →
-  TSHARK_DST   = 4
-  TSHARK_PROTO = 5
-  TSHARK_SIZE  = 6
-  TSHARK_INFO  = 7
-
-  line = line.lower()
-  line = line.replace(",", "")
-  line = line.replace(":", " ")
-  parts = line.split()
-  
+def process_row(row, writer, fieldmap, uid_map_number):
   # Timestamp
-  message_timestamp = parts[TSHARK_TIME]
+  message_timestamp = row["_ws.col.Time"]
   if float(message_timestamp) <= 0:
     raise ValueError(f"Expected positive timestamp, got {message_timestamp}")
-  fieldmap['message_timestamp'] = message_timestamp
+  fieldmap["message_timestamp"] = message_timestamp
 
   # Source
-  message_source = parts[TSHARK_SRC]
-  fieldmap['message_source'] = message_source
+  message_source = row["_ws.col.Source"]
+  fieldmap["message_source"] = message_source
 
   # Destination
-  message_destination = parts[TSHARK_DST]
-  fieldmap['message_destination'] = message_destination
+  message_destination = row["_ws.col.Destination"]
+  fieldmap["message_destination"] = message_destination
 
   # Protocol
-  message_protocol = parts[TSHARK_PROTO]
+  message_protocol = row["_ws.col.Protocol"].lower()
   if message_protocol not in { "coap", "http" }:
     raise ValueError(f"Unrecognized protol {message_protocol}")
-  fieldmap['message_protocol'] = message_protocol
+  fieldmap["message_protocol"] = message_protocol
 
   # Message size
-  message_size = parts[TSHARK_SIZE]
+  message_size = row["_ws.col.Length"]
   if int(message_size) <= 0:
     raise ValueError(f"Expected positive message size, got {message_size}")
-  fieldmap['message_size'] = message_size
+  fieldmap["message_size"] = message_size
 
   # Enagage protocol-specific parsing
-  protocol_info_parts = parts[TSHARK_INFO:]
-  parse_protocol_information(fieldmap, protocol_info_parts, uid_map_number)
+  parse_protocol_information(fieldmap, row, uid_map_number)
   
   # Write record
   writer.writerow(fieldmap)
@@ -154,41 +127,48 @@ def ingest_tcpdumps(writer, fieldnames, infile_list):
   # Process each file
   uid_map_number = dict()
   for infile in sorted(infile_list):
-    # Attacker dump must be first to populate uid_map_number
+    # Process attacker firrst for uid map
     node = nodes[infile]
     with open(infile, 'r') as inf:
-      for L in inf:
-        # Write node type
+      reader = csv.DictReader(inf, delimiter=";", quotechar='"')
+      for row in reader:
         fieldmap = { f : "" for f in fieldnames }
         fieldmap['node_type'] = node
         fieldmap['message_number'] = -1
-        
-        # Process each line of the file
-        process_line(writer, fieldmap, L, uid_map_number)
+
+        process_row(row, writer, fieldmap, uid_map_number)
         
 if __name__ == "__main__":
   import doctest
   doctest.testmod()
+
+  fieldnames = ['node_type',
+                'message_number',
+                'message_timestamp', 
+                'message_source',
+                'message_destination',
+                'message_protocol',
+                'message_size',
+                'coap_type',
+                'coap_code',
+                'coap_message_id',
+                'coap_token',
+                'coap_proxy_uri',
+                'http_request',
+                'http_request_method',
+                'http_request_full_uri',
+                'http_response',
+                'http_response_code',
+                'http_response_code_desc',
+                'http_response_for_uri']
 
   # Strip mismatched right ; then split
   infile_list = args.infiles.rstrip(';').split(';')
 
   with open(args.outfile, 'w') as outf:
     # Write fields of the header
-    fieldnames = ['node_type',
-                  'message_number',
-                  'message_timestamp', 
-                  'message_source',
-                  'message_destination',
-                  'message_protocol',
-                  'message_size',
-                  'coap_type',
-                  'coap_code',
-                  'coap_message_id',
-                  'coap_token',
-                  'http_code',
-                  'http_resource']
     writer = csv.DictWriter(outf, fieldnames=fieldnames)
     writer.writeheader()
-    
+  
+    # Process the input files
     ingest_tcpdumps(writer, fieldnames, infile_list)
