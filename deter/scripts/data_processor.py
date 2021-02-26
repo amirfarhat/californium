@@ -38,7 +38,10 @@ def parse_protocol_information(fieldmap, row, uid_map_number):
     fieldmap["coap_type"] = row["coap.type"]
     fieldmap["coap_code"] = row["coap.code"]
     fieldmap["coap_message_id"] = row["coap.mid"]
-    fieldmap["coap_token"] = row["coap.token"]
+
+    # Machine sometimes inserts : so we need to remove it
+    coap_token = row["coap.token"].replace(":", "")
+    fieldmap["coap_token"] = coap_token
 
     # TODO Transform code into c.dd format
 
