@@ -139,7 +139,7 @@ def ingest_tcpdumps(writer, fieldnames, infile_list):
   # Process each file
   uid_map_number = dict()
   for infile in sorted(infile_list):
-    # Process attacker firrst for uid map
+    # Process attacker first for uid map
     node = nodes[infile]
     with open(infile, 'r') as inf:
       reader = csv.DictReader(inf, delimiter=";", quotechar='"')
