@@ -18,4 +18,26 @@ filter="coap || http"
   -2 \
   -n \
   -R "$filter" \
-  -t e) > "$output_file"
+  -t e \
+  -T fields \
+    -e _ws.col.Time \
+    -e _ws.col.Source \
+    -e _ws.col.Destination \
+    -e _ws.col.Protocol \
+    -e _ws.col.Length \
+    -e coap.type \
+    -e coap.code \
+    -e coap.mid \
+    -e coap.token \
+    -e coap.opt.proxy_uri \
+    -e http.request \
+    -e http.request.method \
+    -e http.request.full_uri \
+    -e http.response \
+    -e http.response.code \
+    -e http.response.code.desc \
+    -e http.response_for.uri \
+  -E header=y \
+  -E separator=";" \
+  -E quote=d \
+  -E occurrence=f) > "$output_file"

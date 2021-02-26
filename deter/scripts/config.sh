@@ -26,7 +26,6 @@ WAIT_TIME=10 # Wait time after experiment finishes
 
 # Binary toggles
 TCPDUMP=1
-ORIGIN_SERVER_APACHE=1
 DO_PROXY_LOGGING=0
 PROXY_TOP=1
 DO_JAVA_PROFILING=1
