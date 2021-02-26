@@ -49,6 +49,11 @@ def parse_protocol_information(fieldmap, row, uid_map_number):
     coap_message_id = fieldmap["coap_message_id"]
     coap_token = fieldmap["coap_token"]
     uid = f"{coap_message_id}_{coap_token}".lower()
+    if ":" in uid or ":" in coap_token:
+      print(coap_token)
+      print(uid)
+      print(list(uid_map_number.items())[:20])
+      raise Exception()
 
   elif protocol == "http":
     # Is HTTP request?
