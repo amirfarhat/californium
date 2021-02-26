@@ -40,13 +40,15 @@ def parse_protocol_information(fieldmap, row, uid_map_number):
     fieldmap["coap_message_id"] = row["coap.mid"]
     fieldmap["coap_token"] = row["coap.token"]
 
+    # TODO Transform code into c.dd format
+
     # CoAP Options
     fieldmap["coap_proxy_uri"] = row["coap.opt.proxy_uri"]
 
     # Uid is made from the CoAP message ID and token
     coap_message_id = fieldmap["coap_message_id"]
     coap_token = fieldmap["coap_token"]
-    uid = f"{coap_message_id}_{coap_token}"
+    uid = f"{coap_message_id}_{coap_token}".lower()
 
   elif protocol == "http":
     # Is HTTP request?
@@ -60,11 +62,13 @@ def parse_protocol_information(fieldmap, row, uid_map_number):
     fieldmap["http_response_code_desc"] = row["http.response.code.desc"]
     fieldmap["http_response_for_uri"] = row["http.response_for.uri"]
 
+    # TODO lowercase the request method
+
     # Get whichever URI is first and not empty string
     uri = fieldmap["http_request_full_uri"] or fieldmap["http_response_for_uri"]
 
     # Uid (from CoAP message ID and token), is the requested resource
-    uid = uri.split("/")[-1]
+    uid = uri.split("/")[-1].lower()
 
   else:
     raise ValueError(f"Uncrecognized protocol {protocol}")
