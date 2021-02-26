@@ -16,7 +16,7 @@ touch $TMP_DATA/$PROXY_LOGNAME
 
 proxy_logging="nothanks"
 pid_error_file="$TMP_DATA/java_error%p.log"
-proxy_args="-XX:ErrorFile=$pid_error_file -Xmx${PROXY_HEAP_SIZE_MB}m"
+proxy_args="-Xmx${PROXY_HEAP_SIZE_MB}m"
 
 if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   # Include argument to do stdout logging in the proxy
@@ -30,8 +30,9 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
 fi
 
 # Run the proxy with stderr and stdout redirected to proxy log
+eval "pwd"
 echo "Running proxy..."
-((java $proxy_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
+((sudo java $proxy_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) > $TMP_DATA/$PROXY_LOGNAME 2>&1) &
 
 # Wait until proxy pid shows up
 while [[ -z `pgrep java` ]]; do
@@ -48,7 +49,7 @@ echo "Ran proxy with pid $proxy_pid..."
 if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   cd $UTILS_HOME/$PROFILER_DIR_NAME
   echo "Starting profiling..."
-  ./profiler.sh start -t -e $PROFILING_EVENT $proxy_pid
+  sudo ./profiler.sh start -t -e $PROFILING_EVENT $proxy_pid
   echo "Done"
 fi
 
@@ -64,7 +65,7 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   # Stop profiling and dump output
   cd $UTILS_HOME/$PROFILER_DIR_NAME
   echo "Stopping profiling..."
-  ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1500 --title $PROFILING_EVENT $proxy_pid
+  sudo ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1500 --title $PROFILING_EVENT $proxy_pid
   echo "Done"
 fi
 
