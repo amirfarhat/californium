@@ -23,6 +23,7 @@ if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   proxy_logging="log"
 fi
 
+# TODO Add else with defaults of the kernel params
 if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   # Set kernel parameters to enable perf profiling
   sudo sysctl -w kernel.perf_event_paranoid=1
@@ -44,6 +45,7 @@ eval "ps aux | grep java"
 echo "Found pids `pgrep java`"
 proxy_pid=`pgrep java`
 echo "Ran proxy with pid $proxy_pid..."
+# Add error message if pgrep java has multiple pids or non-numerics
 
 # Start profiler
 if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
@@ -51,6 +53,7 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   echo "Starting profiling..."
   sudo ./profiler.sh start -t -e $PROFILING_EVENT $proxy_pid
   echo "Done"
+  cd ~
 fi
 
 echo "Sleeping for $PROXY_DURATION seconds..."
@@ -67,6 +70,7 @@ if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   echo "Stopping profiling..."
   sudo ./profiler.sh stop -f $TMP_DATA/$FLAMEGRAPH_NAME --width 1500 --title $PROFILING_EVENT $proxy_pid
   echo "Done"
+  cd ~
 fi
 
 # Kill proxy
