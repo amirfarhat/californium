@@ -39,6 +39,7 @@ public class Proxy2 {
 
 	public static void main(String[] args)
 			throws IOException, ConnectorException, InterruptedException, GeneralSecurityException {
+		System.out.println("Made it to main");
 		String start = args.length > 0 ? args[0] : null;
 		if (start != null) {
 			String[] args2 = Arrays.copyOfRange(args, 1, args.length);
@@ -61,6 +62,7 @@ public class Proxy2 {
 				ExampleHttpServer.main(args2);
 				return;
 			} else if (BASIC_FORWARDING_PROXY_2.equals(start)) {
+				System.out.println("Made it to BASIC_FORWARDING_PROXY_2");
 				BasicForwardingProxy2.main(args2);
 				return;
 			} else if (AYNC_HTTP_CLIENT.equals(start)) {
