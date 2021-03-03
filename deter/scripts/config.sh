@@ -48,9 +48,9 @@ CLIENT_DURATION=$(( $ORIGIN_SERVER_DURATION - $PAUSE_TIME ))
 
 # Java Perf Profiling
 FLAMEGRAPH_NAME="flamegraph.svg"
-PROFILER_DIR_NAME="async-profiler-1.8.3-linux-x64"
+PROFILER_DIR_NAME="async-profiler-1.8.4-linux-x64"
 PROFILE_BINARY_NAME="$PROFILER_DIR_NAME.tar.gz"
-PROFILE_BINARY_URL="https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.3/$PROFILE_BINARY_NAME"
+PROFILE_BINARY_URL="https://github.com/jvm-profiling-tools/async-profiler/releases/download/v1.8.4/$PROFILE_BINARY_NAME"
 
 # Origin server
 ORIGIN_SERVER_NAME="originserver.coap-setup.MIT-DoS.isi.deterlab.net"

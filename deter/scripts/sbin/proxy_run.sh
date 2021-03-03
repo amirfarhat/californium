@@ -16,7 +16,7 @@ touch $TMP_DATA/$PROXY_LOGNAME
 
 proxy_logging="nothanks"
 pid_error_file="$TMP_DATA/java_error%p.log"
-proxy_args="-Xmx${PROXY_HEAP_SIZE_MB}m"
+proxy_args="-Xmx${PROXY_HEAP_SIZE_MB}m -XX:+UnlockDiagnosticVMOptions -XX:+DebugNonSafepoints"
 
 if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
   # Include argument to do stdout logging in the proxy
@@ -24,6 +24,8 @@ if [[ $DO_PROXY_LOGGING -eq 1 ]]; then
 fi
 
 # TODO Add else with defaults of the kernel params
+# TODO restructure this file to make it simpler
+# TODO how does the profiler interact 
 if [[ $DO_JAVA_PROFILING -eq 1 ]]; then
   # Set kernel parameters to enable perf profiling
   sudo sysctl -w kernel.perf_event_paranoid=1
@@ -36,12 +38,15 @@ echo "Running proxy..."
 ((sudo java $proxy_args -jar $CF_HOME/demo-apps/run/cf-proxy2-3.0.0-SNAPSHOT.jar BasicForwardingProxy2 $proxy_logging $PROXY_CONNECTIONS) 2>&1 > $TMP_DATA/$PROXY_LOGNAME) &
 
 # Wait until proxy pid shows up
+# TODO temp variable while this until file shows up lsof -p PID | grep java_pid
+# java    29294 root    6u     unix 0x00000000da9de351       0t0   1575907 /tmp/.java_pid29294.tmp type=STREAM
 while [[ -z `pgrep java` ]]; do
   sleep 0.1
 done
 
-eval "ps aux | grep java"
+sleep 1
 
+eval "ps aux | grep java"
 echo "Found pids `pgrep java`"
 proxy_pid=`pgrep java`
 echo "Ran proxy with pid $proxy_pid..."
