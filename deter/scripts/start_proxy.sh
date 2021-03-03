@@ -30,7 +30,6 @@ fi
 if [[ $PROXY_TOP -eq 1 ]]; then
   log "Running proxy top...\n"
   sudo screen -c $UTILS_HOME/oplog.conf -d -m -L sudo $BIN_HOME/top.sh
-  
 fi
 
 log "Running proxy...\n"

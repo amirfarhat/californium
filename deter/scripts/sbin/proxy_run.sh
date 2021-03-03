@@ -10,7 +10,8 @@ while [[ ! -z `pgrep java` ]]; do
 done
 
 # Clean previous data
-sudo rm -rf $TMP_DATA/*
+sudo rm -f $TMP_DATA/$PROXY_LOGNAME
+sudo rm -f $TMP_DATA/$FLAMEGRAPH_NAME
 
 # Create log file
 sudo touch $TMP_DATA/$PROXY_LOGNAME
