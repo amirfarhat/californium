@@ -1111,8 +1111,14 @@ public class Exchange {
 			}
 		} catch (RejectedExecutionException e) {
 			LOGGER.debug("{} execute:", this, e);
+			System.out.println("[Exchange] RejectedExecutionException");
+			e.printStackTrace();
+
 		} catch (Throwable t) {
 			LOGGER.error("{} execute:", this, t);
+			System.out.println("[Exchange] Throwable");
+			t.printStackTrace();
+			
 		}
 	}
 

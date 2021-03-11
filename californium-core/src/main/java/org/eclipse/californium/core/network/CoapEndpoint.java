@@ -1399,6 +1399,8 @@ public class CoapEndpoint implements Endpoint {
 			});
 		} catch (RejectedExecutionException e) {
 			LOGGER.debug("{} execute:", tag, e);
+			System.out.println("[CoapEndpoint] RejectedExecutionException");
+			e.printStackTrace();
 		}
 	}
 
