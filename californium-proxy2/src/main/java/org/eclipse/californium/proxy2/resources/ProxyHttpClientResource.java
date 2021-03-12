@@ -197,7 +197,7 @@ public class ProxyHttpClientResource extends ProxyCoapResource {
 			public void failed(Exception ex) {
 				DataLog("HTTP_RECVD_FAILED " + incomingCoapRequest.getMID() + "_" + incomingCoapRequest.getTokenString());
 
-				LOGGER.debug("Failed to get the http response: {}", ex.getMessage());
+				LOGGER.debug("Failed to get the http response: ({}) {}", ex.getClass().getName(), ex.getMessage());
 				if (ex instanceof SocketTimeoutException) {
 					exchange.sendResponse(new Response(ResponseCode.GATEWAY_TIMEOUT));
 				} else {
